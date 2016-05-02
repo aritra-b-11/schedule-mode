@@ -1,0 +1,40 @@
+* features
+
+** table for effort estimation
+headers:
+- C1:block name
+- C2:work
+- C3:effort
+- C4:total
+
+first line:
+- C1:block name only
+- C2:reason
+- C4:total time
+
+rest lines:
+- C2: detailed tasks
+- C3: detailed effort
+
+end with a vertival line
+
+automation scope:
+- calculate total effort from each effort rows
+
+** check for resources
+
+** add timeline for estimated work
+** add dependacy
+** new effort if added, subsequent date needs to be shifted accordingly
+** can check if effort table and schedule table are matched/balanced
+** can check free time for each resource
+
+
+
+* tasks
+
+** TODO create a mode for scheduling
+** TODO make a default templete for the effoet estimation
+** TODO make a formula for adding total effort
+
+
