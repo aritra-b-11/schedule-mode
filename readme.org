@@ -33,8 +33,9 @@ automation scope:
 
 * tasks
 
-** TODO create a mode for scheduling
-** TODO make a default templete for the effoet estimation
+** DONE create a mode for scheduling
+** TODO to search for file in current dir, tab to finish
+** TODO make a default templete for the effort estimation
 ** TODO make a formula for adding total effort
 
 
