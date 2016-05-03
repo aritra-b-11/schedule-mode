@@ -6,21 +6,39 @@
   (message "File name: %s" file-name)
   (if (file-exists-p file-name)
       nil
-    (progn (create-file-buffer file-name)
-     (write-file file-name)
-     (save-buffer)
-     (message "no")))
+    (progn
+      (find-file file-name)
+      (create-file-buffer file-name)
+      (write-file file-name)
+      (save-buffer)))
   (switch-to-buffer file-name)
   (org-based-schedule-mode)
-  (schedule-init))
+  (schedule-init-effort-est)
+  (save-buffer)
+  )
 
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
 
-
-(defun schedule-init ()
-  "Start the effort estimation table"
-  (insert "|------|-----|-----|------|\n| block name |")
-)
+(defun schedule-init-effort-est ()
+  "Start the effort estimation table templete"
+  (insert "|------|-----|-----|------|\n| block name | work | effort | total |")
+  (org-cycle)
+  (previous-line)
+  (org-ctrl-c-minus)
+  (next-line)
+  (org-shiftmetadown)
+  ;; at this point the heading is created
+  (org-metadown)
+  (next-line)
+  ;; all blocks are added, total line to be created
+  (org-ctrl-c-minus)
+  (next-line)
+  (org-shiftmetadown)
+  (org-metadown)
+  (insert "Total")
+  (org-cycle)
+  (org-ctrl-c-minus)
+  )
 
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
 
