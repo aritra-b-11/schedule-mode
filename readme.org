@@ -16,15 +16,15 @@ rest lines:
 - C2: detailed tasks
 - C3: detailed effort
 
-end with a vertival line
+end with a vertical line
 
 automation scope:
 - calculate total effort from each effort rows
 
 ** check for resources
 
-** add timeline for estimated work
-** add dependacy
+** add time-line for estimated work
+** add dependency
 ** new effort if added, subsequent date needs to be shifted accordingly
 ** can check if effort table and schedule table are matched/balanced
 ** can check free time for each resource
@@ -35,7 +35,16 @@ automation scope:
 
 ** DONE create a mode for scheduling
 ** TODO to search for file in current dir, tab to finish
-** TODO make a default templete for the effort estimation
+** DONE Create comment for user
+** DONE make a default template for the effort estimation table
 ** TODO make a formula for adding total effort
+** TODO calculate total effort from individual block level efforts
+** TODO link the work to schedule table work
+** TODO add auto complete features to schedule work
+** DONE make a default template for planning table
+** TODO only start date needs to be added, others are ref it the effort
+** TODO unbalanced work
+** TODO free-time for resource
+** TODO plan for dependencies
 
 
