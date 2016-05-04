@@ -13,6 +13,7 @@
       (save-buffer)))
   (switch-to-buffer file-name)
   (org-based-schedule-mode)
+  (schedule-comment-basic-org-table)
   (schedule-init-effort-est)
   (save-buffer)
   (end-of-buffer)
@@ -25,7 +26,7 @@
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
 
 (defun schedule-init-effort-est ()
-  "Start the effort estimation table templete"
+  "Start the effort estimation table template"
   (insert "|------|-----|-----|------|\n| block name | work | effort | total |")
   (org-cycle)
   (previous-line)
@@ -46,7 +47,7 @@
   )
 
 (defun schedule-init-planning-est ()
-  "Start planning estimation table templete"
+  "Start planning estimation table template"
   (insert "|-|-|-|-|-|-|-|-|-|\n| Sl. | Mile Stone | Important Date | Asset | Work | Planned Start | Planned End | Actual Start | Actual End|")
   (org-cycle)
   (org-ctrl-c-minus)
@@ -58,4 +59,14 @@
 )
 
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
+
+(defun schedule-comment-basic-org-table ()
+  "Add comment for basic org and schedule mode"
+  (insert "#+BEGIN_COMMENT\n")
+  (insert "---------------------------\n| Org Based Schedule Mode |\n---------------------------\n")
+  (insert "\nUsage: first fill the effort estimation table, then fill planning table\n")
+  (insert "\n\tEffort Estimation table:\n\t\tfirst line reserve for top block name\n\t\tthen from the next, fill individual task and effort\n\t\tFinally calculate total effort of the block by pressing key\n")
+  (insert "\n\tSchedule table:\n\t\tAdd milestone and important dates\n\t\tAdd asset and task\n\t\tSet the date\n")
+  (insert "#+END_COMMENT\n\n\n")
+)
 
