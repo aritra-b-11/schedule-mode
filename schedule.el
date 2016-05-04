@@ -15,6 +15,11 @@
   (org-based-schedule-mode)
   (schedule-init-effort-est)
   (save-buffer)
+  (end-of-buffer)
+  (org-return)
+  (org-return)
+  (schedule-init-planning-est)
+  (save-buffer)
   )
 
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
@@ -39,6 +44,18 @@
   (org-cycle)
   (org-ctrl-c-minus)
   )
+
+(defun schedule-init-planning-est ()
+  "Start planning estimation table templete"
+  (insert "|-|-|-|-|-|-|-|-|-|\n| Sl. | Mile Stone | Important Date | Asset | Work | Planned Start | Planned End | Actual Start | Actual End|")
+  (org-cycle)
+  (org-ctrl-c-minus)
+  (org-metadown)
+  (org-shiftmetadown)
+  (next-line)
+  (next-line)
+  (org-ctrl-c-minus)
+)
 
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
 
