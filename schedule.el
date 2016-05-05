@@ -70,3 +70,22 @@
   (insert "#+END_COMMENT\n\n\n")
 )
 
+(defun schedule-calc-total-effort ()
+  "Calculate total effort from the individual tasks"
+  (interactive)
+  (search-backward "|-")
+  (set-mark (point))
+  (search-forward "-|")
+  (search-forward "-|")
+  (narrow-to-region)
+  (keyboard-quit)
+  (beginning-of-buffer)
+  (org-cycle)
+  (org-cycle)
+  (org-cycle)
+  (org-cycle)
+  ;; get the line number of narrowed bufffer
+  ;; calculate the formula from it
+)
+
+
