@@ -1,16 +1,23 @@
 ;; schedule.el --- make scheduling in emacs org mode
 
-(defun schedule (file-name)
+(defun schedule-mode (file-name)
   "make schedule"
-  (interactive "sOpen/Create file: ")
+  (interactive
+   ;; (interactive "sOpen/Create file: ")
+   (list
+  (read-file-name "sOpen/Create file: ")))
   (message "File name: %s" file-name)
-  (if (file-exists-p file-name)
-      nil
-    (progn
-      (find-file file-name)
-      (create-file-buffer file-name)
-      (write-file file-name)
-      (save-buffer)))
+  ;; (if (file-exists-p file-name)
+  ;;     nil
+  ;;   (progn
+  ;;     (find-file file-name)
+  ;;     (create-file-buffer file-name)
+  ;;     (write-file file-name)
+  ;;     (save-buffer)))
+  (create-file-buffer file-name)
+  (write-file file-name)
+  (org-open-file file-name)
+  (save-buffer)
   (switch-to-buffer file-name)
   (org-based-schedule-mode)
   (schedule-comment-basic-org-table)
@@ -70,22 +77,33 @@
   (insert "#+END_COMMENT\n\n\n")
 )
 
+(defun schedule-enter-blockwise-work-effort ()
+  "Enter the block wise effort"
+  (interactive)
+)
+
 (defun schedule-calc-total-effort ()
   "Calculate total effort from the individual tasks"
   (interactive)
   (search-backward "|-")
   (set-mark (point))
+  (point-to-register "b")
   (search-forward "-|")
   (search-forward "-|")
-  (narrow-to-region)
-  (keyboard-quit)
+  (point-to-register "e")
+  ;; (narrow-to-region (register-to-point "b") (register-to-point "e"))
+  (narrow-to-region (mark) (point))
+  ;; (keyboard-quit)
   (beginning-of-buffer)
+  (next-line)
   (org-cycle)
   (org-cycle)
   (org-cycle)
-  (org-cycle)
+
   ;; get the line number of narrowed bufffer
   ;; calculate the formula from it
+  (insert (line-number-at-pos))
+  (widen)
 )
 
 
