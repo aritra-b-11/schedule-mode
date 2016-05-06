@@ -22,7 +22,6 @@ automation scope:
 - calculate total effort from each effort rows
 
 ** check for resources
-
 ** add time-line for estimated work
 ** add dependency
 ** new effort if added, subsequent date needs to be shifted accordingly
@@ -32,16 +31,16 @@ automation scope:
 
 
 * tasks
-
 ** DONE create a mode for scheduling
-** TODO to search for file in current dir, tab to finish
+** TODO Keep adding the documentation to the main schedule-mode
+** DONE to search for file in current dir, tab to finish
 ** DONE Create comment for user
 ** DONE make a default template for the effort estimation table
+** DONE make a default template for planning table
 ** TODO make a formula for adding total effort
 ** TODO calculate total effort from individual block level efforts
 ** TODO link the work to schedule table work
 ** TODO add auto complete features to schedule work
-** DONE make a default template for planning table
 ** TODO only start date needs to be added, others are ref it the effort
 ** TODO unbalanced work
 ** TODO free-time for resource
