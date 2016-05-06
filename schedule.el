@@ -1,32 +1,42 @@
 ;; schedule.el --- make scheduling in emacs org mode
 
-(defun schedule-mode (file-name)
-  "make schedule"
-  (interactive
-   ;; (interactive "sOpen/Create file: ")
-   (list
-  (read-file-name "sOpen/Create file: ")))
-  (message "File name: %s" file-name)
-  ;; (if (file-exists-p file-name)
-  ;;     nil
-  ;;   (progn
-  ;;     (find-file file-name)
-  ;;     (create-file-buffer file-name)
-  ;;     (write-file file-name)
-  ;;     (save-buffer)))
-  (create-file-buffer file-name)
-  (write-file file-name)
-  (org-open-file file-name)
-  (save-buffer)
-  (switch-to-buffer file-name)
+(defun schedule-mode ()
+  "Create schedule based on org mode.
+Current features include :
+1. Create a new file with default following templates:
+Effort Estimation
+Schedule Planning
+2. Calculate the total effort formula from the effort template."
+  (interactive)
+  (if (y-or-n-p "New file?")
+		(progn
+		  (setq full-file-name (read-file-name "sOpen/Create file: "))
+		  (setq file-name (car (reverse (split-string full-file-name "/"))))
+		    (message "File name: %s" file-name)
+		    (switch-to-buffer file-name)
+		  )
+		(progn
+		  (message "Switching to schedule mode")
+		  )
+		)
+  (set-buffer file-name)
   (org-based-schedule-mode)
-  (schedule-comment-basic-org-table)
-  (schedule-init-effort-est)
-  (save-buffer)
-  (end-of-buffer)
-  (org-return)
-  (org-return)
-  (schedule-init-planning-est)
+  (if (y-or-n-p "Init file?")
+		(progn
+		  (schedule-comment-basic-org-table)
+		  (schedule-init-effort-est)
+		  (end-of-buffer)
+		  (org-return)
+		  (org-return)
+		  (schedule-init-planning-est)
+		  (org-return)
+		  (org-return)
+		  )
+    (progn
+      (message "not printing table template")
+      )
+    )
+  (write-file full-file-name)
   (save-buffer)
   )
 
@@ -87,11 +97,11 @@
   (interactive)
   (search-backward "|-")
   (set-mark (point))
-  (point-to-register "b")
+  ;; (set-register b (point))
   (search-forward "-|")
   (search-forward "-|")
-  (point-to-register "e")
-  ;; (narrow-to-region (register-to-point "b") (register-to-point "e"))
+  ;; (set-register e (point))
+  ;; (narrow-to-region (get-register b) (get-register e))
   (narrow-to-region (mark) (point))
   ;; (keyboard-quit)
   (beginning-of-buffer)
@@ -99,11 +109,13 @@
   (org-cycle)
   (org-cycle)
   (org-cycle)
-
   ;; get the line number of narrowed bufffer
   ;; calculate the formula from it
-  (insert (line-number-at-pos))
+  ;; (insert (line-number-at-pos))
+  ;; (insert (org-table-field-info))
+  ;; how to get info of ref ?
   (widen)
+  (keyboard-quit)
 )
 
 
