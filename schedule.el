@@ -14,12 +14,15 @@ Schedule Planning
 		  (setq file-name (car (reverse (split-string full-file-name "/"))))
 		    (message "File name: %s" file-name)
 		    (switch-to-buffer file-name)
+		    (set-buffer file-name)
+		    (write-file full-file-name)
 		  )
-		(progn
-		  (message "Switching to schedule mode")
-		  )
-		)
-  (set-buffer file-name)
+    (progn
+      (setq file-name (current-buffer))
+      (set-buffer file-name)
+      (message "Switching to schedule mode")
+      )
+    )
   (org-based-schedule-mode)
   (if (y-or-n-p "Init file?")
 		(progn
@@ -37,7 +40,6 @@ Schedule Planning
       (message "not printing table template")
       )
     )
-  (write-file full-file-name)
   (save-buffer)
   )
 
@@ -76,8 +78,6 @@ Schedule Planning
   (org-ctrl-c-minus)
   )
 
-(define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
-
 (defun schedule-comment-basic-org-table ()
   "Add comment for basic org and schedule mode"
   (insert "#+BEGIN_COMMENT\n")
@@ -92,6 +92,14 @@ Schedule Planning
   "Enter the block wise effort"
   (interactive)
   )
+
+(defun schedule-calc-edit-formula (dline-start col-start dline-end col-end)
+  "Edit Table formula"
+  (org-table-edit-formulas)
+  (insert (concat ":=vsum(@" (number-to-string dline-start) "$" (number-to-string col-start) "..@" (number-to-string dline-end) "$" (number-to-string col-end) ")"))
+  ;; (org-ctrl-c-ctrl-c)
+  ;; (org-cycle)
+)
 
 (defun schedule-calc-total-effort ()
   "Calculate total effort from the individual tasks"
@@ -141,13 +149,13 @@ Schedule Planning
   (if (get org-table-formula-debug "value")
       (progn
 	(setq org-table-formula-debug nil)
-	(insert (concat ":=vsum(@" (number-to-string dline-start) "$" (number-to-string col-start) "..@" (number-to-string dline-end) "$" (number-to-string col-end) ")"))
-	(org-cycle)
+	;; (insert "x")
+	(schedule-calc-edit-formula dline-start col-start dline-end col-end)
 	(setq org-table-formula-debug t)
 	)
     (progn
-      (insert (concat ":=vsum(@" (number-to-string dline-start) "$" (number-to-string col-start) "..@" (number-to-string dline-end) "$" (number-to-string col-end) ")"))
-      (org-cycle)
+      (schedule-calc-edit-formula dline-start col-start dline-end col-end)
+      ;; (insert "y")
       )
     )
 )
@@ -174,7 +182,6 @@ Schedule Planning
   (next-line)
   (next-line)
   ;; (insert "z")
-  (insert (concat ":=vsum(@" (number-to-string all-dline-start) "$" (number-to-string all-col-start) "..@" (number-to-string all-dline-end) "$" (number-to-string all-col-end) ")"))
-  (org-cycle)
+  (schedule-calc-edit-formula all-dline-start all-col-start all-dline-end all-col-end)
   (org-shiftmetaup)
 )
