@@ -1,5 +1,21 @@
 ;; schedule.el --- make scheduling in emacs org mode
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Main function defination
+;; --------------------
+;; |   schedule mode  |
+;; --------------------
+;; first checks
+;; if new file needs to be created,
+;; - yes asks where to create it
+;; - asks if initilize templates to be added
+;; -- yes adds the comment, effort templete, schedule template
+;; - changes the mode to shcedule mode
+;; else
+;; - make current buffer mode as schedule mode
+;; save buffer
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
 (defun schedule-mode ()
   "Create schedule based on org mode.
 Current features include :
@@ -43,7 +59,15 @@ Schedule Planning
   (save-buffer)
   )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Make an Org based schedule-mode
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; init template for effort estimation
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-init-effort-est ()
   "Start the effort estimation table template"
@@ -66,6 +90,10 @@ Schedule Planning
   (org-ctrl-c-minus)
   )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; init template for Planning estimation
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
 (defun schedule-init-planning-est ()
   "Start planning estimation table template"
   (insert "|-|-|-|-|-|-|-|-|-|\n| Sl. | Mile Stone | Important Date | Asset | Work | Planned Start | Planned End | Actual Start | Actual End|")
@@ -78,6 +106,10 @@ Schedule Planning
   (org-ctrl-c-minus)
   )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; init comment for using schedule based org mode
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
 (defun schedule-comment-basic-org-table ()
   "Add comment for basic org and schedule mode"
   (insert "#+BEGIN_COMMENT\n")
@@ -88,11 +120,9 @@ Schedule Planning
   (insert "#+END_COMMENT\n\n\n")
   )
 
-(defun schedule-enter-blockwise-work-effort ()
-  "Enter the block wise effort"
-  (interactive)
-  ()
-)
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; claculate edit formula for effort calculations
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-calc-edit-formula (dline-cur col-cur dline-start col-start dline-end col-end)
   "Edit Table formula"
@@ -101,7 +131,11 @@ Schedule Planning
   (kill-visual-line)
   (org-table-fedit-finish)
   (org-ctrl-c-star)
-)
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; calculate total effort from block level efforts
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-calc-total-effort ()
   "Calculate total effort from the individual tasks"
@@ -162,8 +196,11 @@ Schedule Planning
       ;; (insert "y")
       )
     )
-)
+  )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; calculate cumulative effort from all block efforts
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-calc-all-effort ()
   "Calculate total effort from induvidual block efforts"
@@ -199,7 +236,45 @@ Schedule Planning
       (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
       )
     )
-)
+  )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; enter blockwise effort
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
+(defun schedule-enter-blockwise-work-effort ()
+  "Enter the block wise effort"
+  (interactive)
+  (message "enter the effort manually as of now :(")
+  )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; calculate total and cumulative block efforts
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-calc-effort-table ()
+  "Calculate and apply all efforts from the effort estimation table. First apply the individual block level table, then calculate the total cumulative effort"
+  (interactive)
+  (search-backward-regexp "|[ ]+block name[ ]+|")
+  (next-line)
+  (org-cycle)
+  (search-backward "|-")
+  (next-line)
+  (org-cycle)
+  ;; (search-backward "|")
+  ;; (set-mark-command)
+  ;; (search-forward "|")
+  ;; (kill-ring-save)
+  ;; (setq block-name (split-string (car kill-ring)))
+  (org-table-edit-field)
+  (set-mark-command)
+  (end-of-buffer)
+  (copy-region-as-kill (mark) (point))
+  (org-table-finish-edit-field)
+  ;; (insert (car kill-ring))
+  ;; (message block-name)
+  ;; (while
+  ;; (search-backward "|")
+  ;; )
+  ;; latest-kill-ring-is-this
+  )
