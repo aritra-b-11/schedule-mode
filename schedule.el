@@ -91,14 +91,16 @@ Schedule Planning
 (defun schedule-enter-blockwise-work-effort ()
   "Enter the block wise effort"
   (interactive)
-  )
+  ()
+)
 
-(defun schedule-calc-edit-formula (dline-start col-start dline-end col-end)
+(defun schedule-calc-edit-formula (dline-cur col-cur dline-start col-start dline-end col-end)
   "Edit Table formula"
   (org-table-edit-formulas)
-  (insert (concat ":=vsum(@" (number-to-string dline-start) "$" (number-to-string col-start) "..@" (number-to-string dline-end) "$" (number-to-string col-end) ")"))
-  ;; (org-ctrl-c-ctrl-c)
-  ;; (org-cycle)
+  (insert (concat "@" (number-to-string dline-cur) "$" (number-to-string col-cur) " = vsum(@" (number-to-string dline-start) "$" (number-to-string col-start) "..@" (number-to-string dline-end) "$" (number-to-string col-end) ")"))
+  (kill-visual-line)
+  (org-table-fedit-finish)
+  (org-ctrl-c-star)
 )
 
 (defun schedule-calc-total-effort ()
@@ -144,17 +146,19 @@ Schedule Planning
   (next-line)
   (search-backward "|")
   (right-char)
+  (setq col-cur (org-table-current-column))
+  (setq dline-cur (org-table-current-dline))
   ;; (insert "x")
   ;; (message (concat ":=vsum(@" (number-to-string dline-start) "$" (number-to-string col-start) "..@" (number-to-string dline-end) "$" (number-to-string col-end) ")"))
   (if (get org-table-formula-debug "value")
       (progn
 	(setq org-table-formula-debug nil)
 	;; (insert "x")
-	(schedule-calc-edit-formula dline-start col-start dline-end col-end)
+	(schedule-calc-edit-formula dline-cur col-cur  dline-start col-start dline-end col-end)
 	(setq org-table-formula-debug t)
 	)
     (progn
-      (schedule-calc-edit-formula dline-start col-start dline-end col-end)
+      (schedule-calc-edit-formula dline-cur col-cur dline-start col-start dline-end col-end)
       ;; (insert "y")
       )
     )
@@ -181,7 +185,21 @@ Schedule Planning
   (setq all-dline-end (org-table-current-dline))
   (next-line)
   (next-line)
+  (setq col-cur (org-table-current-column))
+  (setq dline-cur (org-table-current-dline))
   ;; (insert "z")
-  (schedule-calc-edit-formula all-dline-start all-col-start all-dline-end all-col-end)
-  (org-shiftmetaup)
+  (if (get org-table-formula-debug "value")
+      (progn
+	(setq org-table-formula-debug nil)
+	(insert "x")
+	(schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
+	(setq org-table-formula-debug t)
+	)
+    (progn
+      (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
+      )
+    )
 )
+
+
+
