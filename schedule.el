@@ -196,6 +196,7 @@ Schedule Planning
       ;; (insert "y")
       )
     )
+  (save-buffer)
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -236,6 +237,7 @@ Schedule Planning
       (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
       )
     )
+  (save-buffer)
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -248,6 +250,40 @@ Schedule Planning
   (message "enter the effort manually as of now :(")
   )
 
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; get field value
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-get-field-value ()
+  "This function intends to get the field value of the table"
+  (search-backward "|-")
+  (next-line)
+  (org-cycle)
+  (search-backward "|")
+  (right-char)
+  (set-mark (point))
+  (search-forward "|")
+  (left-char)
+  ;; (kill-ring-save)
+  ;; (setq block-name (split-string (car kill-ring)))
+  ;; (org-table-edit-field t)
+  ;; (set-mark-command)
+  ;; (end-of-buffer)
+  (copy-region-as-kill (mark) (point))
+  ;; (org-ctrl-c-ctrl-c)
+  ;; (org-table-finish-edit-field)
+  ;; (insert (car kill-ring))
+  ;; (message block-name)
+  ;; (while
+  ;; (search-backward "|")
+  ;; )
+  ;; kill-ring-is-this
+  ;; (yank)
+  (setq field-value (car kill-ring))
+  field-value
+  )
+
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; calculate total and cumulative block efforts
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -255,26 +291,49 @@ Schedule Planning
 (defun schedule-calc-effort-table ()
   "Calculate and apply all efforts from the effort estimation table. First apply the individual block level table, then calculate the total cumulative effort"
   (interactive)
+  (schedule-narrow-effort-table)
   (search-backward-regexp "|[ ]+block name[ ]+|")
   (next-line)
   (org-cycle)
-  (search-backward "|-")
-  (next-line)
-  (org-cycle)
-  ;; (search-backward "|")
-  ;; (set-mark-command)
-  ;; (search-forward "|")
-  ;; (kill-ring-save)
-  ;; (setq block-name (split-string (car kill-ring)))
-  (org-table-edit-field)
-  (set-mark-command)
-  (end-of-buffer)
-  (copy-region-as-kill (mark) (point))
-  (org-table-finish-edit-field)
-  ;; (insert (car kill-ring))
-  ;; (message block-name)
-  ;; (while
-  ;; (search-backward "|")
-  ;; )
-  ;; latest-kill-ring-is-this
+  (setq field-value "")
+  ;; while all other blocks
+  ;; check if first field in the block name is not 'Cumulative'
+  ;; then apply calc total effort fun
+  (while (not (string= (car (split-string field-value "[\t ]")) "Cumulative"))
+    (setq field-value (schedule-get-field-value))
+    (message "Block:%s" field-value)
+    (schedule-calc-total-effort)
+    (search-forward "|-")
+    (next-line)
+    (org-cycle)
+    )
+  (inser "e")
+  (search-backward-regexp "|[ ]+block name[ ]+|")
+  (search-forward-regexp "|[ ]+Cumulative[ ]+|")
+  ;;   (search-forward-regexp "^|[-]+.*
+  ;; .*Cumulative.*|
+  ;; |[-]+.*|")
+  ;; (org-cycle)
+  ;; (insert "x")
+  ;; (schedule-calc-all-effort)
+  )
+
+
+(defun schedule-narrow-effort-table ()
+  "Narrow effort estimation table"
+  (interactive)
+  (search-backward-regexp "^|[-]+.*
+.*block name.*|
+|[-]+.*|")
+  ;; (set-mark (point))
+  (setq effort-table-start (point))
+  (search-forward-regexp "^|[-]+.*
+.*Cumulative.*|
+|[-]+.*|")
+  (insert " ")
+  (left-char)
+  (setq effort-table-end (point))
+  ;; (narrow-to-region (mark) (point))
+  (narrow-to-region effort-table-start effort-table-end)
+  ;; (keyboard-quit)
   )
