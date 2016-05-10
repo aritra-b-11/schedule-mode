@@ -323,15 +323,17 @@ Schedule Planning
   ;; while all other blocks
   ;; check if first field in the block name is not 'Cumulative'
   ;; then apply calc total effort fun
-  (while (not (string= (car (split-string field-value "[\t ]")) "Cumulative"))
+  ;; (while (not (string= (car (split-string field-value "[\t ]")) "Cumulative"))
+  (while (not (org-at-regexp-p "[\t ]+Cumulative[\t ]+"))
     (setq field-value (schedule-get-field-value))
     (message "Block:%s" field-value)
     (schedule-calc-total-effort)
     (search-forward "|-")
     (next-line)
-    (org-cycle)
+    ;; (org-cycle)
+    ;; (insert "x")
     )
-  (inser "e")
+  ;; (insert "e")
   (search-backward-regexp "|[ ]+block name[ ]+|")
   (search-forward-regexp "|[ ]+Cumulative[ ]+|")
   ;;   (search-forward-regexp "^|[-]+.*
@@ -339,7 +341,8 @@ Schedule Planning
   ;; |[-]+.*|")
   ;; (org-cycle)
   ;; (insert "x")
-  ;; (schedule-calc-all-effort)
+  (schedule-calc-all-effort)
+  (widen)
   )
 
 
