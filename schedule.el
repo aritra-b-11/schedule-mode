@@ -24,37 +24,47 @@ Effort Estimation
 Schedule Planning
 2. Calculate the total effort formula from the effort template."
   (interactive)
-  (if (y-or-n-p "New file?")
-		(progn
-		  (setq full-file-name (read-file-name "sOpen/Create file: "))
-		  (setq file-name (car (reverse (split-string full-file-name "/"))))
-		    (message "File name: %s" file-name)
-		    (switch-to-buffer file-name)
-		    (set-buffer file-name)
-		    (write-file full-file-name)
-		  )
-    (progn
-      (setq file-name (current-buffer))
-      (set-buffer file-name)
-      (message "Switching to schedule mode")
-      )
-    )
+  (if (y-or-n-p "Open or Create New file?")
+      (progn
+	(setq full-file-name (read-file-name "sOpen/Create file: "))
+	(setq file-name (car (reverse (split-string full-file-name "/"))))
+	(message "File name: %s" file-name)
+	;; (if (file-exists-p full-file-name)
+	;;     (progn
+	;;       (message "got it")
+	;;       (switch-to-buffer file-name)
+	;;       (set-buffer file-name)
+	;;       )
+	;;   (progn
+	    (message "not here")
+	    (switch-to-buffer file-name)
+	    (set-buffer file-name)
+	    (write-file full-file-name)
+	  ;;   )
+	  ;; )
+	)
+	(progn
+	  (setq file-name (current-buffer))
+	  (set-buffer file-name)
+	  (message "Switching to schedule mode")
+	  )
+	)
   (org-based-schedule-mode)
   (if (y-or-n-p "Init file?")
-		(progn
-		  (schedule-comment-basic-org-table)
-		  (schedule-init-effort-est)
-		  (end-of-buffer)
-		  (org-return)
-		  (org-return)
-		  (schedule-init-planning-est)
-		  (end-of-buffer)
-		  (org-return)
-		  (org-return)
-		  )
+      (progn
+	(schedule-comment-basic-org-table)
+	(schedule-init-effort-est)
+	(end-of-buffer)
+	(org-return)
+	(org-return)
+	(schedule-init-planning-est)
+	(end-of-buffer)
+	(org-return)
+	(org-return)
+	)
     (progn
-      (message "not printing table template")
-      )
+	(message "not printing table template")
+	)
     )
   (save-buffer)
   )
@@ -71,7 +81,10 @@ Schedule Planning
 
 (defun schedule-init-effort-est ()
   "Start the effort estimation table template"
-  (insert "|------|-----|-----|------|\n| block name | work | effort | total |")
+  (insert "\n#+CAPTION: Effort Estimation Table\n")
+  (insert "#+BEGIN_TABLE")
+  (org-return)
+  (insert "\n|------|-----|-----|------|\n| block name | work | effort | total |")
   (org-cycle)
   (previous-line)
   (org-ctrl-c-minus)
@@ -88,6 +101,8 @@ Schedule Planning
   (insert "Cumulative")
   (org-cycle)
   (org-ctrl-c-minus)
+  (end-of-buffer)
+  (insert "#+END_TABLE")
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -96,14 +111,23 @@ Schedule Planning
 
 (defun schedule-init-planning-est ()
   "Start planning estimation table template"
-  (insert "|-|-|-|-|-|-|-|-|-|\n| Sl. | Mile Stone | Important Date | Asset | Work | Planned Start | Planned End | Actual Start | Actual End|")
+  ;; (interactive)
+  (insert "#+CAPTION: Schedule Estimation Table\n")
+  (insert "#+BEGIN_TABLE")
+  (org-return)
+  (insert "\n|-|-|-|-|-|-|-|-|-|\n| Sl. | Mile Stone | Important Date | Asset | Work | Planned Start | Planned End | Actual Start | Actual End|")
   (org-cycle)
   (org-ctrl-c-minus)
-  (org-metadown)
+  ;; (insert "x")
   (org-shiftmetadown)
-  (next-line)
-  (next-line)
+  ;; (next-line)
+  ;; (org-metadown)
+  ;; (next-line)
+  ;; (next-line)
   (org-ctrl-c-minus)
+  (org-metadown)
+  (end-of-buffer)
+  (insert "\n#+END_TABLE\n")
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -322,18 +346,23 @@ Schedule Planning
 (defun schedule-narrow-effort-table ()
   "Narrow effort estimation table"
   (interactive)
-  (search-backward-regexp "^|[-]+.*
-.*block name.*|
-|[-]+.*|")
+  (setq init-point (point))
+  (search-backward-regexp "^#[+]CAPTION:.*
+#[+]BEGIN_TABLE")
+  ;;   (search-backward-regexp "^|[-]+.*
+  ;; .*block name.*|
+  ;; |[-]+.*|")
   ;; (set-mark (point))
   (setq effort-table-start (point))
-  (search-forward-regexp "^|[-]+.*
-.*Cumulative.*|
-|[-]+.*|")
-  (insert " ")
-  (left-char)
+  (search-forward-regexp "^#[+]END_TAbLE")
+  ;;   (search-forward-regexp "^|[-]+.*
+  ;; .*Cumulative.*|
+  ;; |[-]+.*|")
+  ;; (insert " ")
+  ;; (left-char)
   (setq effort-table-end (point))
   ;; (narrow-to-region (mark) (point))
   (narrow-to-region effort-table-start effort-table-end)
   ;; (keyboard-quit)
+  (goto-char init-point)
   )
