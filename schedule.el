@@ -29,19 +29,20 @@ Schedule Planning
 	(setq full-file-name (read-file-name "sOpen/Create file: "))
 	(setq file-name (car (reverse (split-string full-file-name "/"))))
 	(message "File name: %s" file-name)
-	;; (if (file-exists-p full-file-name)
-	;;     (progn
-	;;       (message "got it")
-	;;       (switch-to-buffer file-name)
-	;;       (set-buffer file-name)
-	;;       )
-	;;   (progn
+	(if (file-exists-p full-file-name)
+	    (progn
+	      (message "got it")
+	      (find-file-noselect file-name)
+	      (switch-to-buffer file-name)
+	      (set-buffer file-name)
+	      )
+	  (progn
 	    (message "not here")
 	    (switch-to-buffer file-name)
 	    (set-buffer file-name)
 	    (write-file full-file-name)
-	  ;;   )
-	  ;; )
+	    )
+	  )
 	)
 	(progn
 	  (setq file-name (current-buffer))
