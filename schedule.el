@@ -165,12 +165,16 @@ Schedule Planning
 (defun schedule-calc-total-effort ()
   "Calculate total effort from the individual tasks"
   (interactive)
+  (setq init-pos (point))
+  (search-backward-regexp "|[\t ]+effort[\t ]+|")
+  (org-cycle)
+  (setq col (org-table-current-column))
+  (goto-char init-pos)
   (search-backward "|-")
   (right-char)
   (next-line)
   (org-cycle)
   (org-cycle)
-  ;; (insert "b")
   (setq col-start (org-table-current-column))
   (setq dline-start (org-table-current-dline))
   ;; wihout narrow
@@ -213,11 +217,15 @@ Schedule Planning
       (progn
 	(setq org-table-formula-debug nil)
 	;; (insert "x")
-	(schedule-calc-edit-formula dline-cur col-cur  dline-start col-start dline-end col-end)
+	;; (schedule-calc-edit-formula dline-cur col-cur  dline-start col-start dline-end col-end)
+	(schedule-calc-edit-formula dline-cur col-cur dline-start col dline-end col)
+
 	(setq org-table-formula-debug t)
 	)
     (progn
-      (schedule-calc-edit-formula dline-cur col-cur dline-start col-start dline-end col-end)
+      (schedule-calc-edit-formula dline-cur col-cur dline-start col dline-end col)
+
+      ;; (schedule-calc-edit-formula dline-cur col-cur dline-start col-start dline-end col-end)
       ;; (insert "y")
       )
     )
@@ -231,14 +239,18 @@ Schedule Planning
 (defun schedule-calc-all-effort ()
   "Calculate total effort from induvidual block efforts"
   (interactive)
-  (search-backward-regexp "|[ ]+total[ ]+|")
+  (search-backward-regexp "|[\t ]+total[\t ]+|")
+  (setq init-pos (point))
+  (org-cycle)
+  (setq col (org-table-current-column))
+  (goto-char init-pos)
   (right-char)
   (next-line)
   (next-line)
   ;; (insert "x")
   (setq all-col-start (org-table-current-column))
   (setq all-dline-start (org-table-current-dline))
-  (search-forward-regexp "|[ ]+Cumulative[ ]+|")
+  (search-forward-regexp "|[\t ]+Cumulative[\t ]+|")
   (org-cycle)
   (org-cycle)
   (previous-line)
@@ -255,11 +267,14 @@ Schedule Planning
       (progn
 	(setq org-table-formula-debug nil)
 	(insert "x")
-	(schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
+	;; (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
+	(schedule-calc-edit-formula dline-cur col-cur all-dline-start col-cur all-dline-end col)
+
 	(setq org-table-formula-debug t)
 	)
     (progn
-      (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
+      ;; (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
+      (schedule-calc-edit-formula dline-cur col-cur all-dline-start col-cur all-dline-end col)
       )
     )
   (save-buffer)
@@ -272,7 +287,38 @@ Schedule Planning
 (defun schedule-enter-blockwise-work-effort ()
   "Enter the block wise effort"
   (interactive)
-  (message "enter the effort manually as of now :(")
+  (setq main-block (read-string "Block Name ? "))
+  (message "Entered Main block name is: %s" main-block)
+  (message "starting to enter effort for block %s in effort table" main-block)
+  (search-forward "-|")
+  (org-cycle)
+  (org-shiftmetadown)
+  (org-ctrl-c-minus)
+  (insert main-block)
+  ;; Main block name is added
+  ;; (org-shiftmetadown)
+  ;; (org-metadown)
+  ;; (next-line)
+  (org-cycle)
+  (while 1
+    (next-line)
+    (org-shiftmetadown)
+    (org-cycle)
+    (setq work-name (read-string "Work? [when done press C-g to quit] :"))
+    (insert work-name)
+    (org-cycle)
+    (setq effort (read-string "Effort? :"))
+    (insert effort)
+    )
+  ;; Check if table is empty
+  ;; (schedule-narrow-effort-table)
+  ;; not considering the case starting before block name
+  ;; (search-backward-regexp "|[\t ]+block name[\t ]+|")
+  ;; (org-cycle)
+  ;; (next-line)
+  ;; (next-line)
+  ;; Then enter block wise effort
+  ;; (widen)
   )
 
 
@@ -317,7 +363,7 @@ Schedule Planning
   "Calculate and apply all efforts from the effort estimation table. First apply the individual block level table, then calculate the total cumulative effort"
   (interactive)
   (schedule-narrow-effort-table)
-  (search-backward-regexp "|[ ]+block name[ ]+|")
+  (search-backward-regexp "|[\t ]+block name[\t ]+|")
   (next-line)
   (org-cycle)
   (setq field-value "")
@@ -335,8 +381,8 @@ Schedule Planning
     ;; (insert "x")
     )
   ;; (insert "e")
-  (search-backward-regexp "|[ ]+block name[ ]+|")
-  (search-forward-regexp "|[ ]+Cumulative[ ]+|")
+  (search-backward-regexp "|[\t ]+block name[\t ]+|")
+  (search-forward-regexp "|[\t ]+Cumulative[\t ]+|")
   ;;   (search-forward-regexp "^|[-]+.*
   ;; .*Cumulative.*|
   ;; |[-]+.*|")
@@ -370,3 +416,7 @@ Schedule Planning
   ;; (keyboard-quit)
   (goto-char init-point)
   )
+
+
+
+
