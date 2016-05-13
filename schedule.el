@@ -170,6 +170,11 @@ Schedule Planning
   (org-cycle)
   (setq col (org-table-current-column))
   (goto-char init-pos)
+  (setq init-pos (point))
+  (search-backward-regexp "|[\t ]+total[\t ]+|")
+  (org-cycle)
+  (setq col-fm (org-table-current-column))
+  (goto-char init-pos)
   (search-backward "|-")
   (right-char)
   (next-line)
@@ -218,12 +223,12 @@ Schedule Planning
 	(setq org-table-formula-debug nil)
 	;; (insert "x")
 	;; (schedule-calc-edit-formula dline-cur col-cur  dline-start col-start dline-end col-end)
-	(schedule-calc-edit-formula dline-cur col-cur dline-start col dline-end col)
+	(schedule-calc-edit-formula dline-cur col-fm dline-start col dline-end col)
 
 	(setq org-table-formula-debug t)
 	)
     (progn
-      (schedule-calc-edit-formula dline-cur col-cur dline-start col dline-end col)
+      (schedule-calc-edit-formula dline-cur col-fm dline-start col dline-end col)
 
       ;; (schedule-calc-edit-formula dline-cur col-cur dline-start col-start dline-end col-end)
       ;; (insert "y")
@@ -268,13 +273,13 @@ Schedule Planning
 	(setq org-table-formula-debug nil)
 	(insert "x")
 	;; (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
-	(schedule-calc-edit-formula dline-cur col-cur all-dline-start col-cur all-dline-end col)
+	(schedule-calc-edit-formula dline-cur col-fm all-dline-start col all-dline-end col)
 
 	(setq org-table-formula-debug t)
 	)
     (progn
       ;; (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
-      (schedule-calc-edit-formula dline-cur col-cur all-dline-start col-cur all-dline-end col)
+      (schedule-calc-edit-formula dline-cur col-fm all-dline-start col all-dline-end col)
       )
     )
   (save-buffer)
@@ -363,6 +368,7 @@ Schedule Planning
   "Calculate and apply all efforts from the effort estimation table. First apply the individual block level table, then calculate the total cumulative effort"
   (interactive)
   (schedule-narrow-effort-table)
+  (schedule-delete-current-table-formula)
   (search-backward-regexp "|[\t ]+block name[\t ]+|")
   (next-line)
   (org-cycle)
@@ -381,8 +387,10 @@ Schedule Planning
     ;; (insert "x")
     )
   ;; (insert "e")
+  (message "Individual block effort calculated")
   (search-backward-regexp "|[\t ]+block name[\t ]+|")
   (search-forward-regexp "|[\t ]+Cumulative[\t ]+|")
+  (org-cycle)
   ;;   (search-forward-regexp "^|[-]+.*
   ;; .*Cumulative.*|
   ;; |[-]+.*|")
@@ -392,6 +400,9 @@ Schedule Planning
   (widen)
   )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Narrow only effort table
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-narrow-effort-table ()
   "Narrow effort estimation table"
@@ -417,6 +428,14 @@ Schedule Planning
   (goto-char init-point)
   )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Delete all formulas from current table
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-
+(defun schedule-delete-current-table-formula ()
+  "Delete all formula of the current table"
+  (setq init-pos (point))
+  (replace-regexp "^[#][+]TBLFM:.*$" "")
+  (goto-char init-pos)
+  )
