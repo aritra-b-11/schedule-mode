@@ -45,5 +45,10 @@ automation scope:
 ** TODO unbalanced work
 ** TODO free-time for resource
 ** TODO plan for dependencies
+** TODO mile stone to be inserted from a different buffer : mile-stone-buffer
+** TODO mile stone buffer should have simple bind key like : arrow left, right, up, down to move
+** TODO mile stone buffer should have simple bind key like : space to add and enter to finish
+** TODO to check mile stone buffer should not allow any work to be before the defined block prev work
+
 
 
