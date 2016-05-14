@@ -94,7 +94,7 @@ Schedule Planning
 (defvar schedule-table-planned-end "Planned End" "Schedule Table Field Planned End")
 (defvar schedule-table-actual-start "Actual Start" "Schedule Table Field Actual Start")
 (defvar schedule-table-actual-end "Actual End" "Schedule Table Field Actual End")
-
+(defvar schedule-table-start-mile-stone "Start the project" "Schedule Table first Mile Stone")
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; init template for effort estimation
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -186,6 +186,7 @@ Schedule Planning
 (defun schedule-calc-total-effort ()
   "Calculate total effort from the individual tasks"
   (interactive)
+  (save-buffer)
   (setq init-pos (point))
   (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-effort  "[\t ]+|"))
   (org-cycle)
@@ -461,7 +462,10 @@ Schedule Planning
   (goto-char init-pos)
   )
 
-
+(defun schedule-add-mile-stones ()
+  "Add mile stones based on effort table"
+  (interactive)
+  )
 
 
 
