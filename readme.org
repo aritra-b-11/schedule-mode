@@ -37,8 +37,8 @@ automation scope:
 ** DONE Create comment for user
 ** DONE make a default template for the effort estimation table
 ** DONE make a default template for planning table
-** TODO make a formula for adding total effort
-** TODO calculate total effort from individual block level efforts
+** DONE make a formula for adding total effort
+** DONE calculate total effort from individual block level efforts
 ** TODO link the work to schedule table work
 ** TODO add auto complete features to schedule work
 ** TODO only start date needs to be added, others are ref it the effort
