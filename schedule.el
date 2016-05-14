@@ -77,6 +77,25 @@ Schedule Planning
 (define-derived-mode org-based-schedule-mode org-mode "org-based-scheduling-mode")
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Define variables for printing
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defvar schedule-effort-table-block-name "block name" "Effort Table Field block name")
+(defvar schedule-effort-table-work "work" "Effort Table Field work")
+(defvar schedule-effort-table-effort "effort" "Effort Table Field effort")
+(defvar schedule-effort-table-total "total" "Effort Table Field total")
+(defvar schedule-effort-table-cumulative "Cumulative" "Effort Table Field Cumulative")
+(defvar schedule-table-sl "Sl." "Schedule Table Field Serial No.")
+(defvar schedule-table-mile-stone "Mile Stone" "Schedule Table Field Mile Stone")
+(defvar schedule-table-deadline "Deadline" "Schedule Table Field Deadline")
+(defvar schedule-table-resource "Resource" "Schedule Table Field Resource")
+(defvar schedule-table-work "Work" "Schedule Table Field Work")
+(defvar schedule-table-planned-start "Planned Start" "Schedule Table Field Planned Start")
+(defvar schedule-table-planned-end "Planned End" "Schedule Table Field Planned End")
+(defvar schedule-table-actual-start "Actual Start" "Schedule Table Field Actual Start")
+(defvar schedule-table-actual-end "Actual End" "Schedule Table Field Actual End")
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; init template for effort estimation
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -85,7 +104,8 @@ Schedule Planning
   (insert "\n#+CAPTION: Effort Estimation Table\n")
   (insert "#+BEGIN_TABLE")
   (org-return)
-  (insert "\n|------|-----|-----|------|\n| block name | work | effort | total |")
+  (insert  "\n|-|-|-|-|\n")
+  (insert (concat "| " schedule-effort-table-block-name " | " schedule-effort-table-work " | " schedule-effort-table-effort " | " schedule-effort-table-total " |"))
   (org-cycle)
   (previous-line)
   (org-ctrl-c-minus)
@@ -99,7 +119,7 @@ Schedule Planning
   (next-line)
   (org-shiftmetadown)
   (org-metadown)
-  (insert "Cumulative")
+  (insert schedule-effort-table-cumulative)
   (org-cycle)
   (org-ctrl-c-minus)
   (end-of-buffer)
@@ -116,7 +136,8 @@ Schedule Planning
   (insert "#+CAPTION: Schedule Estimation Table\n")
   (insert "#+BEGIN_TABLE")
   (org-return)
-  (insert "\n|-|-|-|-|-|-|-|-|-|\n| Sl. | Mile Stone | Important Date | Asset | Work | Planned Start | Planned End | Actual Start | Actual End|")
+  (insert "\n|-|-|-|-|-|-|-|-|-|\n")
+  (insert (concat " | " schedule-table-sl " | " schedule-table-mile-stone " | " schedule-table-deadline " | " schedule-table-resource " | " schedule-table-work " | " schedule-table-planned-start " | " schedule-table-planned-end " | " schedule-table-actual-start " | " schedule-table-actual-end))
   (org-cycle)
   (org-ctrl-c-minus)
   ;; (insert "x")
@@ -439,3 +460,8 @@ Schedule Planning
   (replace-regexp "^[#][+]TBLFM:.*$" "")
   (goto-char init-pos)
   )
+
+
+
+
+
