@@ -187,12 +187,12 @@ Schedule Planning
   "Calculate total effort from the individual tasks"
   (interactive)
   (setq init-pos (point))
-  (search-backward-regexp "|[\t ]+effort[\t ]+|")
+  (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-effort  "[\t ]+|"))
   (org-cycle)
   (setq col (org-table-current-column))
   (goto-char init-pos)
   (setq init-pos (point))
-  (search-backward-regexp "|[\t ]+total[\t ]+|")
+  (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-total "[\t ]+|"))
   (org-cycle)
   (setq col-fm (org-table-current-column))
   (goto-char init-pos)
@@ -265,7 +265,7 @@ Schedule Planning
 (defun schedule-calc-all-effort ()
   "Calculate total effort from induvidual block efforts"
   (interactive)
-  (search-backward-regexp "|[\t ]+total[\t ]+|")
+  (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-total "[\t ]+|"))
   (setq init-pos (point))
   (org-cycle)
   (setq col (org-table-current-column))
@@ -276,7 +276,7 @@ Schedule Planning
   ;; (insert "x")
   (setq all-col-start (org-table-current-column))
   (setq all-dline-start (org-table-current-dline))
-  (search-forward-regexp "|[\t ]+Cumulative[\t ]+|")
+  (search-forward-regexp (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|"))
   (org-cycle)
   (org-cycle)
   (previous-line)
@@ -292,7 +292,7 @@ Schedule Planning
   (if (get org-table-formula-debug "value")
       (progn
 	(setq org-table-formula-debug nil)
-	(insert "x")
+	;; (insert "x")
 	;; (schedule-calc-edit-formula dline-cur col-cur all-dline-start all-col-start all-dline-end all-col-end)
 	(schedule-calc-edit-formula dline-cur col-fm all-dline-start col all-dline-end col)
 
@@ -390,7 +390,7 @@ Schedule Planning
   (interactive)
   (schedule-narrow-effort-table)
   (schedule-delete-current-table-formula)
-  (search-backward-regexp "|[\t ]+block name[\t ]+|")
+  (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-block-name "[\t ]+|"))
   (next-line)
   (org-cycle)
   (setq field-value "")
@@ -398,7 +398,7 @@ Schedule Planning
   ;; check if first field in the block name is not 'Cumulative'
   ;; then apply calc total effort fun
   ;; (while (not (string= (car (split-string field-value "[\t ]")) "Cumulative"))
-  (while (not (org-at-regexp-p "[\t ]+Cumulative[\t ]+"))
+  (while (not (org-at-regexp-p (concat "[\t ]+" schedule-effort-table-cumulative "[\t ]+")))
     (setq field-value (schedule-get-field-value))
     (message "Block:%s" field-value)
     (schedule-calc-total-effort)
@@ -409,8 +409,8 @@ Schedule Planning
     )
   ;; (insert "e")
   (message "Individual block effort calculated")
-  (search-backward-regexp "|[\t ]+block name[\t ]+|")
-  (search-forward-regexp "|[\t ]+Cumulative[\t ]+|")
+  (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-block-name "[\t ]+|"))
+  (search-forward-regexp (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|"))
   (org-cycle)
   ;;   (search-forward-regexp "^|[-]+.*
   ;; .*Cumulative.*|
