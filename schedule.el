@@ -94,7 +94,9 @@ Schedule Planning
 (defvar schedule-table-planned-end "Planned End" "Schedule Table Field Planned End")
 (defvar schedule-table-actual-start "Actual Start" "Schedule Table Field Actual Start")
 (defvar schedule-table-actual-end "Actual End" "Schedule Table Field Actual End")
-(defvar schedule-table-start-mile-stone "Start the project" "Schedule Table first Mile Stone")
+(defvar schedule-table-start-mile-stone "Start of the project" "Schedule Table first Mile Stone")
+(defvar schedule-table-end-mile-stone "End of the project" "Schedule Table last Mile Stone")
+
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; init template for effort estimation
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -454,7 +456,6 @@ Schedule Planning
 ;; Delete all formulas from current table
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
 (defun schedule-delete-current-table-formula ()
   "Delete all formula of the current table"
   (setq init-pos (point))
@@ -462,9 +463,52 @@ Schedule Planning
   (goto-char init-pos)
   )
 
+
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add mile stones
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
 (defun schedule-add-mile-stones ()
   "Add mile stones based on effort table"
   (interactive)
+  (schedule-construct-assoc-list-from-effort-table)
+  )
+
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Make a Association List from the effort table
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-construct-assoc-list-from-effort-table ()
+  "Construct a Assoc list from the effort table"
+  (defvar block-work-assoc-list '() "An association list for block and works")
+  (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-cumulative "[\t ]+|"))
+  (org-cycle)
+  (schedule-narrow-effort-table)
+  ;; (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-block-name "[\t ]+|"))
+  ;; (setq col-block (org-table-current-column))
+  (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-work "[\t ]+|"))
+  (setq col-work (org-table-current-column))
+  (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-effort "[\t ]+|"))
+  (setq col-effort (org-table-current-column))
+  (next-line)
+  (next-line)
+  (while (not (org-at-regexp-p (concat "[\t ]+" schedule-effort-table-cumulative "[\t ]+")))
+    (search-backward "|-")
+    (org-cycle)
+    (setq key-block-name (schedule-get-field-value))
+    (next-line)
+    (setq dline-start (org-table-current-dline))
+    (search-forward "-|")
+    (org-shifttab)
+    (setq dline-end (org-table-current-dline))
+    ;; construct the assoc list of block and effort
+    (nil)
+    ;; end of list construction
+    (search-backward "|-")
+    (org-cycle)
+    )
   )
 
 
