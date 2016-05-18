@@ -271,7 +271,7 @@ Schedule Planning
   (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-total "[\t ]+|"))
   (setq init-pos (point))
   (org-cycle)
-  (setq col (org-table-current-column))
+  (setq col-fm (org-table-current-column))
   (goto-char init-pos)
   (right-char)
   (next-line)
@@ -403,7 +403,7 @@ Schedule Planning
   ;; check if first field in the block name is not 'Cumulative'
   ;; then apply calc total effort fun
   ;; (while (not (string= (car (split-string field-value "[\t ]")) "Cumulative"))
-  (while (not (org-at-regexp-p (concat "[\t ]+" schedule-effort-table-cumulative "[\t ]+")))
+  (while (not (org-at-regexp-p (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|")))
     (setq field-value (schedule-get-field-value))
     (message "Block:%s" field-value)
     (schedule-calc-total-effort)
@@ -465,7 +465,25 @@ Schedule Planning
   (goto-char init-pos)
   )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Delete current field value
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
+(defun schedule-delete-current-field-value-at-point ()
+  "Delete current field value"
+  ;; (interactive)
+  (search-backward "|")
+  (right-char)
+  (setq field-start (point))
+  (search-forward "|")
+  (left-char)
+  (setq field-end (point))
+  (kill-region field-start field-end)
+  (org-cycle)
+  ;; (narrow-to-region field-start field-end)
+  ;; (replace-regexp "|.*|" "")
+  ;; (widen)
+  )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add mile stones
@@ -475,6 +493,7 @@ Schedule Planning
   "Add mile stones based on effort table"
   (interactive)
   (schedule-construct-assoc-list-from-effort-table)
+  (save-buffer)
   )
 
 
@@ -484,61 +503,74 @@ Schedule Planning
 
 (defun schedule-construct-assoc-list-from-effort-table ()
   "Construct a Assoc list from the effort table"
-  (defvar block-work-assoc-list '() "An association list for block and works")
-  (message "starting to construct the assoc list from effort table")
-  (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-cumulative "[\t ]+|"))
-  (org-cycle)
-  (schedule-narrow-effort-table)
-  ;; (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-block-name "[\t ]+|"))
-  ;; (setq col-block (org-table-current-column))
-  (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-work "[\t ]+|"))
-  (search-forward schedule-effort-table-work)
-  (setq col-work (org-table-current-column))
-  ;; (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-effort "[\t ]+|"))
-  ;; (setq col-effort (org-table-current-column))
-  (next-line)
-  (next-line)
-  (message "work col num:%s" col-work)
-  (while (not (org-at-regexp-p (concat "[\t ]+" schedule-effort-table-cumulative "[\t ]+")))
-    (message "in the loop")
-    (let (blockwise-work-list key-block-name)
-      (setq blockwise-work-list `())
-      (message "in the let")
-      (search-backward "|-")
-      (org-cycle)
-      (setq key-block-name (schedule-get-field-value))
-      (message "block name:%s" key-block-name)
-      (next-line)
-      (setq dline-start (org-table-current-dline))
-      (search-forward "-|")
-      (org-shifttab)
-      (setq dline-end (org-table-current-dline))
-      ;; at this point all both of the dlines are obtabined
-      (search-backward "|-")
-      (org-cycle)
-      (org-cycle)
-      (next-line)
-      (message "entering the dotimes")
-      ;; (message "%s" key-block-name)
-      ;; construct the assoc list of block and effort
-      (message "loop will run for:%d times" (+ (-  dline-end dline-start) 1))
-      ;; (dotimes (num (- (string-to-number dline-end) (string-to-number dline-start)))
-      (dotimes (num (+ (-  dline-end dline-start) 1))
-	(message "in the dotimes")
-	(setq blockwise-work-list (cons (schedule-get-field-value) blockwise-work-list))
-	(message "%s" blockwise-work-list)
+  (let* (block-work-assoc-list `())
+    ;; (defvar block-work-assoc-list '() "An association list for block and works")
+    (message "starting to construct the assoc list from effort table")
+    (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-cumulative "[\t ]+|"))
+    (org-cycle)
+    (schedule-narrow-effort-table)
+    (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-block-name "[\t ]+|"))
+    (search-forward schedule-effort-table-block-name)
+    (setq col-block (org-table-current-column))
+    (search-forward-regexp (concat "|[\t ]+" schedule-effort-table-work "[\t ]+|"))
+    (search-backward schedule-effort-table-work)
+    (setq col-work (org-table-current-column))
+    ;; (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-effort "[\t ]+|"))
+    ;; (setq col-effort (org-table-current-column))
+    (next-line)
+    (next-line)
+    (message "work col num:%s, block col num:%s" col-work col-block)
+    (while (not (org-at-regexp-p (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|")))
+      (message "in the loop")
+      (let* (blockwise-work-list key-block-name)
+	(setq blockwise-work-list `())
+	(message "in the let")
+	(search-backward "|-")
+	(org-cycle)
+	(setq key-block-name (schedule-get-field-value))
+	(message "block name:%s" key-block-name)
 	(next-line)
-	;; need to access the effort table with current values
+	(setq dline-start (org-table-current-dline))
+	(search-forward "-|")
+	(org-shifttab)
+	(setq dline-end (org-table-current-dline))
+	;; at this point all both of the dlines are obtabined
+	(search-backward "|-")
+	(org-cycle)
+	(org-cycle)
+	(setq dline-cur (org-table-current-dline))
+	(setq col-cur (org-table-current-column))
+	(setq pos (point))
+	(schedule-calc-edit-formula dline-cur col-cur dline-start col-work dline-end col-work)
+	(setq blockwise-work-list (split-string (replace-regexp-in-string "vsum" "" (schedule-get-field-value) t t) "+()"))
+	;; (next-line)
+	;;dotimes start
+	;; (message "entering the dotimes")
+	;; ;; (message "%s" key-block-name)
+	;; ;; construct the assoc list of block and effort
+	;; (message "loop will run for:%d times" (+ (-  dline-end dline-start) 1))
+	;; ;; (dotimes (num (- (string-to-number dline-end) (string-to-number dline-start)))
+	;; (dotimes (num (+ (-  dline-end dline-start) 1))
+	;; 	(message "in the dotimes")
+	;; 	(setq blockwise-work-list (cons (schedule-get-field-value) blockwise-work-list))
+	;; 	(message "%s" blockwise-work-list)
+	;; 	(next-line)
+	;; 	;; need to access the effort table with current values
+	;; 	)
+	;; dotimes end
+	(setq block-work-assoc-list (cons (list key-block-name blockwise-work-list) block-work-assoc-list))
+	;; end of list construction
+	(goto-char pos)
+	(schedule-delete-current-field-value-at-point)
+	(search-forward "-|")
+	(org-cycle)
 	)
-      (setq block-work-assoc-list (cons (list key-block-name blockwise-work-list) block-work-assoc-list))
-      ;; end of list construction
-      (search-forward "-|")
-      (org-cycle)
       )
+    (widen)
+    (message "assoc list is:%s" block-work-assoc-list)
+    block-work-assoc-list
     )
-  (widen)
-  (message "assoc list is:%s" block-work-assoc-list)
   )
 ;; change it using schedule-calc-edit-formula
-
+;; to delete it schedule-delete-current-field-value-at-point
 
