@@ -486,18 +486,6 @@ Schedule Planning
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; Add mile stones
-;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-
-(defun schedule-add-mile-stones ()
-  "Add mile stones based on effort table"
-  (interactive)
-  (schedule-construct-assoc-list-from-effort-table)
-  (save-buffer)
-  )
-
-
-;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Make a Association List from the effort table
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -574,3 +562,14 @@ Schedule Planning
 ;; change it using schedule-calc-edit-formula
 ;; to delete it schedule-delete-current-field-value-at-point
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add mile stones
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-mile-stones ()
+  "Add mile stones based on effort table"
+  (interactive)
+  (setq block-work-assoc-list (schedule-construct-assoc-list-from-effort-table))
+  (save-buffer)
+  (message "1st elem:%s, rest elems are:%s, length:%s" (car block-work-assoc-list) (cdr block-work-assoc-list) (length block-work-assoc-list))
+  )
