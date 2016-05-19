@@ -31,24 +31,30 @@ automation scope:
 
 
 * tasks
-** DONE create a mode for scheduling
-** TODO Keep adding the documentation to the main schedule-mode
-** DONE to search for file in current dir, tab to finish
-** DONE Create comment for user
-** DONE make a default template for the effort estimation table
-** DONE make a default template for planning table
-** DONE make a formula for adding total effort
-** DONE calculate total effort from individual block level efforts
-** TODO link the work to schedule table work
-** TODO add auto complete features to schedule work
-** TODO only start date needs to be added, others are ref it the effort
-** TODO unbalanced work
-** TODO free-time for resource
-** TODO plan for dependencies
-** TODO mile stone to be inserted from a different buffer : mile-stone-buffer
-** TODO mile stone buffer should have simple bind key like : arrow left, right, up, down to move
-** TODO mile stone buffer should have simple bind key like : space to add and enter to finish
-** TODO to check mile stone buffer should not allow any work to be before the defined block prev work
+** generic
+*** DONE create a mode for scheduling
+*** TODO Keep adding the documentation to the main schedule-mode
+** effort related
+*** DONE to search for file in current dir, tab to finish
+*** DONE Create comment for user
+*** DONE make a default template for the effort estimation table
+*** DONE make a default template for planning table
+*** DONE make a formula for adding total effort
+*** DONE calculate total effort from individual block level efforts
+*** TODO link the work to schedule table work
+*** TODO add auto complete features to schedule work
+*** TODO plan for dependencies
+** schedule related
+*** DONE make an associative array for block work list pair from effort table
+*** TODO mile stone to be inserted from a different buffer : mile-stone-buffer
+*** TODO mile stone buffer should have simple bind key like : arrow left, right, up, down to move
+*** TODO mile stone buffer should have simple bind key like : space to add and enter to finish
+*** TODO to check mile stone buffer should not allow any work to be before the defined block prev work
+*** TODO only start date needs to be added, others are ref it the effort
+*** TODO unbalanced work
+*** TODO free-time for resource
+
+
 
 
 
