@@ -1,5 +1,5 @@
-;; schedule.el --- make scheduling in emacs org mode
-
+;;; schedule.el --- make scheduling in emacs org mode
+;;; Commentary:
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Main function defination
 ;; --------------------
@@ -15,7 +15,8 @@
 ;; - make current buffer mode as schedule mode
 ;; save buffer
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-
+;; Functions :
+;;; Code:
 (defun schedule-mode ()
   "Create schedule based on org mode.
 Current features include :
@@ -24,7 +25,8 @@ Effort Estimation
 Schedule Planning
 2. Calculate the total effort formula from the effort template."
   (interactive)
-  (if (y-or-n-p "Open or Create New file?")
+  (require 'org)
+  (if (y-or-n-p "Open or Create New file? ")
       (progn
 	(setq full-file-name (read-file-name "sOpen/Create file: "))
 	(setq file-name (car (reverse (split-string full-file-name "/"))))
@@ -51,7 +53,7 @@ Schedule Planning
 	  )
 	)
   (org-based-schedule-mode)
-  (if (y-or-n-p "Init file?")
+  (if (y-or-n-p "Init file? ")
       (progn
 	(schedule-comment-basic-org-table)
 	(schedule-init-effort-est)
@@ -80,29 +82,30 @@ Schedule Planning
 ;; Define variables for printing
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defvar schedule-effort-table-block-name "block name" "Effort Table Field block name")
-(defvar schedule-effort-table-work "work" "Effort Table Field work")
-(defvar schedule-effort-table-effort "effort" "Effort Table Field effort")
-(defvar schedule-effort-table-total "total" "Effort Table Field total")
-(defvar schedule-effort-table-cumulative "Cumulative" "Effort Table Field Cumulative")
+
+(defvar schedule-effort-table-block-name "block name" "Effort Table Field block name.")
+(defvar schedule-effort-table-work "work" "Effort Table Field work.")
+(defvar schedule-effort-table-effort "effort" "Effort Table Field effort.")
+(defvar schedule-effort-table-total "total" "Effort Table Field total.")
+(defvar schedule-effort-table-cumulative "Cumulative" "Effort Table Field Cumulative.")
 (defvar schedule-table-sl "Sl." "Schedule Table Field Serial No.")
-(defvar schedule-table-mile-stone "Mile Stone" "Schedule Table Field Mile Stone")
-(defvar schedule-table-deadline "Deadline" "Schedule Table Field Deadline")
-(defvar schedule-table-resource "Resource" "Schedule Table Field Resource")
-(defvar schedule-table-work "Work" "Schedule Table Field Work")
-(defvar schedule-table-planned-start "Planned Start" "Schedule Table Field Planned Start")
-(defvar schedule-table-planned-end "Planned End" "Schedule Table Field Planned End")
-(defvar schedule-table-actual-start "Actual Start" "Schedule Table Field Actual Start")
-(defvar schedule-table-actual-end "Actual End" "Schedule Table Field Actual End")
-(defvar schedule-table-start-mile-stone "Start of the project" "Schedule Table first Mile Stone")
-(defvar schedule-table-end-mile-stone "End of the project" "Schedule Table last Mile Stone")
+(defvar schedule-table-mile-stone "Mile Stone" "Schedule Table Field Mile Stone.")
+(defvar schedule-table-deadline "Deadline" "Schedule Table Field Deadline.")
+(defvar schedule-table-resource "Resource" "Schedule Table Field Resource.")
+(defvar schedule-table-work "Work" "Schedule Table Field Work.")
+(defvar schedule-table-planned-start "Planned Start" "Schedule Table Field Planned Start.")
+(defvar schedule-table-planned-end "Planned End" "Schedule Table Field Planned End.")
+(defvar schedule-table-actual-start "Actual Start" "Schedule Table Field Actual Start.")
+(defvar schedule-table-actual-end "Actual End" "Schedule Table Field Actual End.")
+(defvar schedule-table-start-mile-stone "Start of the project" "Schedule Table first Mile Stone.")
+(defvar schedule-table-end-mile-stone "End of the project" "Schedule Table last Mile Stone.")
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; init template for effort estimation
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-init-effort-est ()
-  "Start the effort estimation table template"
+  "Start the effort estimation table template."
   (insert "\n#+CAPTION: Effort Estimation Table\n")
   (insert "#+BEGIN_TABLE")
   (org-return)
@@ -133,7 +136,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-init-planning-est ()
-  "Start planning estimation table template"
+  "Start planning estimation table template."
   ;; (interactive)
   (insert "#+CAPTION: Schedule Estimation Table\n")
   (insert "#+BEGIN_TABLE")
@@ -159,7 +162,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-comment-basic-org-table ()
-  "Add comment for basic org and schedule mode"
+  "Add comment for basic org and schedule mode."
   (insert "#+BEGIN_COMMENT\n")
   (insert "---------------------------\n| Org Based Schedule Mode |\n---------------------------\n")
   (insert "\nUsage: first fill the effort estimation table, then fill planning table\n")
@@ -173,7 +176,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-calc-edit-formula (dline-cur col-cur dline-start col-start dline-end col-end)
-  "Edit Table formula"
+  "Edit Table formula."
   (org-table-edit-formulas)
   (insert (concat "@" (number-to-string dline-cur) "$" (number-to-string col-cur) " = vsum(@" (number-to-string dline-start) "$" (number-to-string col-start) "..@" (number-to-string dline-end) "$" (number-to-string col-end) ")"))
   (kill-visual-line)
@@ -186,7 +189,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-calc-total-effort ()
-  "Calculate total effort from the individual tasks"
+  "Calculate total effort from the individual tasks."
   (interactive)
   (save-buffer)
   (setq init-pos (point))
@@ -266,7 +269,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-calc-all-effort ()
-  "Calculate total effort from induvidual block efforts"
+  "Calculate total effort from induvidual block efforts!"
   (interactive)
   (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-total "[\t ]+|"))
   (setq init-pos (point))
@@ -314,7 +317,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-enter-blockwise-work-effort ()
-  "Enter the block wise effort"
+  "Enter the block wise effort."
   (interactive)
   (setq main-block (read-string "Block Name ? "))
   (message "Entered Main block name is: %s" main-block)
@@ -356,7 +359,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-get-field-value ()
-  "This function intends to get the field value of the table"
+  "This function intends to get the field value of the table."
   (setq pos (point))
   ;; (search-backward "|-")
   ;; (next-line)
@@ -391,7 +394,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-calc-effort-table ()
-  "Calculate and apply all efforts from the effort estimation table. First apply the individual block level table, then calculate the total cumulative effort"
+  "Calculate and apply all efforts from the effort estimation table.  First apply the individual block level table, then calculate the total cumulative effort."
   (interactive)
   (schedule-narrow-effort-table)
   (schedule-delete-current-table-formula)
@@ -431,7 +434,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-narrow-effort-table ()
-  "Narrow effort estimation table"
+  "Narrow effort estimation table."
   (interactive)
   (setq init-point (point))
   (search-backward-regexp "^#[+]CAPTION:.*
@@ -459,7 +462,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-delete-current-table-formula ()
-  "Delete all formula of the current table"
+  "Delete all formula of the current table."
   (setq init-pos (point))
   (replace-regexp "^[#][+]TBLFM:.*$" "")
   (goto-char init-pos)
@@ -470,7 +473,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-delete-current-field-value-at-point ()
-  "Delete current field value"
+  "Delete current field value."
   ;; (interactive)
   (search-backward "|")
   (right-char)
@@ -490,7 +493,8 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-construct-assoc-list-from-effort-table ()
-  "Construct a Assoc list from the effort table"
+  "Construct a Assoc list from the effort table."
+  (interactive)
   (let* (block-work-assoc-list `())
     ;; (defvar block-work-assoc-list '() "An association list for block and works")
     (message "starting to construct the assoc list from effort table")
@@ -506,7 +510,7 @@ Schedule Planning
     ;; (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-effort "[\t ]+|"))
     ;; (setq col-effort (org-table-current-column))
     (next-line)
-    (next-line)
+    (forward-line)
     (message "work col num:%s, block col num:%s" col-work col-block)
     (while (not (org-at-regexp-p (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|")))
       (message "in the loop")
@@ -555,6 +559,7 @@ Schedule Planning
 	)
       )
     (widen)
+    (set-mark-command 1)
     (message "assoc list is:%s" block-work-assoc-list)
     block-work-assoc-list
     )
@@ -563,13 +568,54 @@ Schedule Planning
 ;; to delete it schedule-delete-current-field-value-at-point
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add mile stone date pair
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-mile-stone-with-date ()
+  "Begin milestone date pair addition."
+  (interactive)
+  (message "Start Date? : ")
+  (org-time-stamp 16)
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add Works from Effort
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-works-in-schedule-table ()
+  "Add all the works in the schedule table from the effort table."
+  (interactive)
+  (search-forward "#+CAPTION: Schedule Estimation Table")
+  (search-forward-regexp (concat "|[\t ]+" schedule-table-work "[\t ]+|"))
+  (dotimes (i 8) (org-cycle))
+  ;; Commentary:
+  ;; from here start putting all the work from effort table
+  (dolist (each-block (reverse block-work-assoc-list))
+    (message (caadr each-block))
+    (dolist (each-task (delete "+" (split-string (caadr each-block))))
+      (insert (car each-block))
+      (insert (concat " " each-task))
+      (dotimes (i 9) (org-cycle))
+      )
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add mile stones
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-add-mile-stones ()
-  "Add mile stones based on effort table"
+  "Add mile stones based on effort table."
   (interactive)
   (setq block-work-assoc-list (schedule-construct-assoc-list-from-effort-table))
   (save-buffer)
+  ;; (set-mark-command)
   (message "1st elem:%s, rest elems are:%s, length:%s" (car block-work-assoc-list) (cdr block-work-assoc-list) (length block-work-assoc-list))
+  (schedule-add-works-in-schedule-table)
+  ;; Still finding a way to create a new buffer
+  ;; (schedule-add-mile-stone-with-date)
   )
+
+(provide 'schedule-mode)
+;;; schedule.el ends here
+
