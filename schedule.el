@@ -592,9 +592,14 @@ Schedule Planning
   ;; from here start putting all the work from effort table
   (dolist (each-block (reverse block-work-assoc-list))
     (message (caadr each-block))
-    (dolist (each-task (delete "+" (split-string (caadr each-block))))
-      (insert (car each-block))
-      (insert (concat " " each-task))
+    (setq task-list (split-string (caadr each-block) "+"))
+    ;; (if (eq (length task-list) 1) then
+    ;;   (insert (concat (car each-block) " " (split-string (split-string each-task "(") ")")))
+    ;;   (dotimes (i 9) (org-cycle))
+    ;;   else
+    (dolist (each-task task-list)
+      ;; (setq each-task (split-string (split-string each-task "(") ")"))
+      (insert (concat (car each-block) " " each-task))
       (dotimes (i 9) (org-cycle))
       )
     )
