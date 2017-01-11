@@ -16,6 +16,23 @@
 ;; save buffer
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Functions :
+;; schedule-mode ()
+;; schedule-init-effort-est ()
+;; schedule-init-planning-est ()
+;; schedule-comment-basic-org-table ()
+;; schedule-calc-edit-formula (dline-cur col-cur dline-start col-start dline-end col-end)
+;; schedule-calc-total-effort ()
+;; schedule-calc-all-effort ()
+;; schedule-enter-blockwise-work-effort ()
+;; schedule-get-field-value ()
+;; schedule-calc-effort-table ()
+;; schedule-narrow-effort-table ()
+;; schedule-delete-current-table-formula ()
+;; schedule-delete-current-field-value-at-point ()
+;; schedule-construct-assoc-list-from-effort-table ()
+;; schedule-add-mile-stone-with-date ()
+;; schedule-add-works-in-schedule-table ()
+;; schedule-add-mile-stones ()
 ;;; Code:
 (defun schedule-mode ()
   "Create schedule based on org mode.
@@ -509,12 +526,12 @@ Schedule Planning
     (setq col-work (org-table-current-column))
     ;; (search-backward-regexp (concat "|[\t ]+" schedule-effort-table-effort "[\t ]+|"))
     ;; (setq col-effort (org-table-current-column))
-    (next-line)
-    (forward-line)
+    (next-line 2)
+    ;; (forward-line)
     (message "work col num:%s, block col num:%s" col-work col-block)
     (while (not (org-at-regexp-p (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|")))
       (message "in the loop")
-      (let* (blockwise-work-list key-block-name)
+      (let* (blockwise-work-list key-block-name block-work-assoc-list)
 	(setq blockwise-work-list `())
 	(message "in the let")
 	(search-backward "|-")
@@ -582,9 +599,10 @@ Schedule Planning
 ;; Add Works from Effort
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-add-works-in-schedule-table ()
-  "Add all the works in the schedule table from the effort table."
+(defun schedule-add-works-in-schedule-table (block-work-assoc-list)
+  "Add all the works defined in arg:BLOCK-WORK-ASSOC-LIST, in the schedule table from the effort table."
   (interactive)
+  (let* (task-list)
   (search-forward "#+CAPTION: Schedule Estimation Table")
   (search-forward-regexp (concat "|[\t ]+" schedule-table-work "[\t ]+|"))
   (dotimes (i 8) (org-cycle))
@@ -600,10 +618,7 @@ Schedule Planning
     (dolist (each-task task-list)
       ;; (setq each-task (split-string (split-string each-task "(") ")"))
       (insert (concat (car each-block) " " each-task))
-      (dotimes (i 9) (org-cycle))
-      )
-    )
-  )
+      (dotimes (i 9) (org-cycle))))))
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add mile stones
@@ -612,14 +627,32 @@ Schedule Planning
 (defun schedule-add-mile-stones ()
   "Add mile stones based on effort table."
   (interactive)
+  (let* (block-work-assoc-list)
   (setq block-work-assoc-list (schedule-construct-assoc-list-from-effort-table))
   (save-buffer)
   ;; (set-mark-command)
   (message "1st elem:%s, rest elems are:%s, length:%s" (car block-work-assoc-list) (cdr block-work-assoc-list) (length block-work-assoc-list))
-  (schedule-add-works-in-schedule-table)
+  (schedule-add-works-in-schedule-table block-work-assoc-list)
   ;; Still finding a way to create a new buffer
   ;; (schedule-add-mile-stone-with-date)
-  )
+  ))
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add planned dates w.r.t. Work
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-planned-dates ()
+  "Add planned Start & End Dates."
+  (interactive)
+  (let* (pos)
+  (setq pos (point))
+  (search-backward "#+CAPTION: Schedule Estimation Table")
+  (goto-char pos)
+  (search-backward schedule-table-end-mile-stone)
+  (goto-char pos)
+  (org-beginning-of-line)
+  (dotimes (i 5) (org-cycle))
+  ))
 
 (provide 'schedule-mode)
 ;;; schedule.el ends here
