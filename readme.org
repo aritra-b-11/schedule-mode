@@ -30,7 +30,7 @@ automation scope:
 
 
 
-* tasks
+* pending tasks
 ** generic
 *** DONE create a mode for scheduling
 *** TODO Keep adding the documentation to the main schedule-mode
@@ -41,11 +41,13 @@ automation scope:
 *** DONE make a default template for planning table
 *** DONE make a formula for adding total effort
 *** DONE calculate total effort from individual block level efforts
+*** TODO plan for hierarchy system
 *** TODO link the work to schedule table work
 *** TODO add auto complete features to schedule work
 *** TODO plan for dependencies
 ** schedule related
 *** DONE make an associative array for block work list pair from effort table
+*** TODO initially: add all pending block works to the schedule table
 *** TODO mile stone to be inserted from a different buffer : mile-stone-buffer
 *** TODO mile stone buffer should have simple bind key like : arrow left, right, up, down to move
 *** TODO mile stone buffer should have simple bind key like : space to add and enter to finish
@@ -55,6 +57,10 @@ automation scope:
 *** TODO free-time for resource
 
 
-
+* issues found
+** schedule-add-works-in-schedule-table
+adding () in schedule table from single task work effort table
+** schedule-calc-effort-table
+sometimes does not calculate cumulative efforts
 
 
