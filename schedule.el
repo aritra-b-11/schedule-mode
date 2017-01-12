@@ -512,7 +512,7 @@ Schedule Planning
 (defun schedule-construct-assoc-list-from-effort-table ()
   "Construct a Assoc list from the effort table."
   (interactive)
-  (let* (block-work-assoc-list `())
+  (setq block-work-assoc-list '())
     ;; (defvar block-work-assoc-list '() "An association list for block and works")
     (message "starting to construct the assoc list from effort table")
     (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-cumulative "[\t ]+|"))
@@ -531,8 +531,7 @@ Schedule Planning
     (message "work col num:%s, block col num:%s" col-work col-block)
     (while (not (org-at-regexp-p (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|")))
       (message "in the loop")
-      (let* (blockwise-work-list key-block-name block-work-assoc-list)
-	(setq blockwise-work-list `())
+      (let* ((blockwise-work-list `()) key-block-name )
 	(message "in the let")
 	(search-backward "|-")
 	(org-cycle)
@@ -577,10 +576,10 @@ Schedule Planning
       )
     (widen)
     (set-mark-command 1)
+    (message "done !!!!!!!!!!!!")
     (message "assoc list is:%s" block-work-assoc-list)
     block-work-assoc-list
     )
-  )
 ;; change it using schedule-calc-edit-formula
 ;; to delete it schedule-delete-current-field-value-at-point
 
@@ -599,7 +598,7 @@ Schedule Planning
 ;; Add Works from Effort
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-add-works-in-schedule-table (block-work-assoc-list)
+(defun schedule-add-works-in-schedule-table ()
   "Add all the works defined in arg:BLOCK-WORK-ASSOC-LIST, in the schedule table from the effort table."
   (interactive)
   (let* (task-list)
@@ -627,15 +626,14 @@ Schedule Planning
 (defun schedule-add-mile-stones ()
   "Add mile stones based on effort table."
   (interactive)
-  (let* (block-work-assoc-list)
   (setq block-work-assoc-list (schedule-construct-assoc-list-from-effort-table))
   (save-buffer)
   ;; (set-mark-command)
   (message "1st elem:%s, rest elems are:%s, length:%s" (car block-work-assoc-list) (cdr block-work-assoc-list) (length block-work-assoc-list))
-  (schedule-add-works-in-schedule-table block-work-assoc-list)
+  (schedule-add-works-in-schedule-table)
   ;; Still finding a way to create a new buffer
   ;; (schedule-add-mile-stone-with-date)
-  ))
+  )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add planned dates w.r.t. Work
