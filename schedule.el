@@ -636,13 +636,46 @@ Schedule Planning
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add date with effort aadjusted
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-end-date-adjusted (cur-date cur-effort)
+  "Add date with adjusted effort time.  CUR-DATE is used for date & CUR-EFFORT is used for effort adjustment."
+  (insert cur-date)
+  (org-cycle)
+  (backward-word 2)
+  (dotimes (i (string-to-number cur-effort)) (org-shiftup))
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Correct dates entered as weekend
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-weekend-correction (cur-date)
+  "Correction of date if entered weekend based on CUR-DATE."
+  (let* (day start end)
+    (org-end-of-line)
+    (setq end (point))
+    (org-beginning-of-line)
+    (setq start (point))
+    (setq day (cadr (split-string cur-date " ")))
+    (if (equal day "Sat>")
+	(progn (org-shifttab) (replace-regexp "<.*>" "" nil start end) (schedule-add-end-date-adjusted cur-date "2"))
+      )
+    (if (equal day "Sun>")
+	(progn (org-shifttab) (replace-regexp "<.*>" "" nil start end) (schedule-add-end-date-adjusted cur-date "1"))
+      )
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add planned dates w.r.t. Work
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-add-planned-dates ()
   "Add planned Start & End Dates."
   (interactive)
-  (let* (pos)
+  (let* (pos cur-task-name cur-block-name cur-effort cur-date start end)
     (setq pos (point))
     (search-backward "#+CAPTION: Schedule Estimation Table")
     (message "inside schedule table")
@@ -655,14 +688,43 @@ Schedule Planning
     ;; (schedule-delete-current-field-value-at-point)
     ;; (org-shifttab)
     (message "Start date? ")
-    (org-time-stamp 1)
+    (org-time-stamp nil)
     (org-shifttab)
-    (search-forward-regexp "\\(.*\\)[\t ]+\\(.*\\)[ \t]+|[ \t]+[<]")
+    (search-forward-regexp "\\([^ ]+\\)[\t ]+\\([^ ]+\\)[ \t]+[|][ \t]+[<]")
     (setq cur-block-name (match-string 1))
     (setq cur-task-name (match-string 2))
-					; go to the effort table, add the effort time and update the planned end
-					; need to adjust the leave and weekends
-    (message (match-string 1) (match-string 2) (match-string 0))
+    (message cur-task-name)
+    (search-backward "#+CAPTION: Effort Estimation Table")
+    (setq start (point))
+    (search-forward "#+CAPTION: Schedule Estimation Table")
+    (setq end (point))
+    (narrow-to-region start end)
+    (beginning-of-buffer)
+    (message cur-block-name)
+    (search-forward cur-block-name)
+    (right-char)
+    (search-forward cur-task-name)
+    (right-char)
+    ;; (org-cycle)
+    (search-forward-regexp "\\([0-9]+\\)[ \t]+|")
+    (setq cur-effort (match-string 1))
+    (widen)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 6) (org-cycle))
+    (search-forward-regexp "\\(<.*>\\)")
+    (setq cur-date (match-string 1))
+    (schedule-weekend-correction cur-date)
+    (org-shifttab)
+    (search-forward-regexp "\\(<.*>\\)")
+    (setq cur-date (match-string 1))
+    (org-beginning-of-line)
+    (dotimes (i 7) (org-cycle))
+    ;; (insert cur-effort)
+					; add weekend adjusted effort here
+    (schedule-add-end-date-adjusted cur-date cur-effort)
+    (org-cycle)
+    (save-buffer)
     ))
 
 (provide 'schedule-mode)
