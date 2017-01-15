@@ -645,6 +645,7 @@ Schedule Planning
   (org-cycle)
   (backward-word 2)
   (dotimes (i (string-to-number cur-effort)) (org-shiftup))
+  (org-shiftdown)
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -654,17 +655,44 @@ Schedule Planning
 (defun schedule-weekend-correction (cur-date)
   "Correction of date if entered weekend based on CUR-DATE."
   (let* (day start end)
-    (org-end-of-line)
+    (search-forward-regexp "[ \t]+|")
     (setq end (point))
-    (org-beginning-of-line)
+    (search-backward-regexp "|[ \t]+[<]")
     (setq start (point))
     (setq day (cadr (split-string cur-date " ")))
     (if (equal day "Sat>")
-	(progn (org-shifttab) (replace-regexp "<.*>" "" nil start end) (schedule-add-end-date-adjusted cur-date "2"))
+	(progn (org-shifttab) (replace-regexp "<.*>" "" nil start end) (schedule-add-end-date-adjusted cur-date "3"))
       )
     (if (equal day "Sun>")
-	(progn (org-shifttab) (replace-regexp "<.*>" "" nil start end) (schedule-add-end-date-adjusted cur-date "1"))
+	(progn (org-shifttab) (replace-regexp "<.*>" "" nil start end) (schedule-add-end-date-adjusted cur-date "2"))
       )
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Correct effort entered for weekend
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-days-in-effort-for-weeekend (cur-effort cur-day)
+  "Add days in CUR-EFFORT effort for weekend, based on CUR-DAY."
+  (let* (weekends added-effort total-effort day-adjust days-after-weekend)
+					; mon=0, tue=1, wed=2, thu=3, fri=4
+					; eg: 12/5=2.4, 2*2=4, 12 + 4=16
+    (if (equal cur-day "Mon") (setq day-adjust 0))
+    (if (equal cur-day "Tue") (setq day-adjust 1))
+    (if (equal cur-day "Wed") (setq day-adjust 2))
+    (if (equal cur-day "Thu") (setq day-adjust 3))
+    (if (equal cur-day "Fri") (setq day-adjust 4))
+    (setq weekends (/ cur-effort 5))
+    (setq added-effort (* weekends 2))
+    (setq total-effort (+ cur-effort added-effort))
+    (setq days-after-weekend (% (+ total-effort day-adjust) 7))
+    (message "%d" days-after-weekend)
+    (if (> days-after-weekend 0)
+	(message "Old Effort:%d (Days) remains unchanged" total-effort)
+       (progn (setq total-effort (- total-effort 2))
+	      (message "New Adjusted Effort:%d" total-effort)))
+    total-effort
     )
   )
 
@@ -675,7 +703,7 @@ Schedule Planning
 (defun schedule-add-planned-dates ()
   "Add planned Start & End Dates."
   (interactive)
-  (let* (pos cur-task-name cur-block-name cur-effort cur-date start end)
+  (let* (pos cur-task-name cur-block-name cur-effort cur-date start end cur-day)
     (setq pos (point))
     (search-backward "#+CAPTION: Schedule Estimation Table")
     (message "inside schedule table")
@@ -718,12 +746,18 @@ Schedule Planning
     (org-shifttab)
     (search-forward-regexp "\\(<.*>\\)")
     (setq cur-date (match-string 1))
+    (org-cycle)
+    (setq cur-day (substring (cadr (split-string cur-date)) 0 3))
+    (setq cur-effort (schedule-add-days-in-effort-for-weeekend (string-to-number cur-effort) cur-day))
+    ;; (message cur-effort)
     (org-beginning-of-line)
     (dotimes (i 7) (org-cycle))
-    ;; (insert cur-effort)
-					; add weekend adjusted effort here
-    (schedule-add-end-date-adjusted cur-date cur-effort)
+    (schedule-add-end-date-adjusted cur-date (number-to-string cur-effort))
     (org-cycle)
+    (org-shifttab)
+    (search-forward-regexp "\\(<.*>\\)")
+    (setq cur-date (match-string 1))
+    (schedule-weekend-correction cur-date)
     (save-buffer)
     ))
 
