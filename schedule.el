@@ -690,14 +690,14 @@ Schedule Planning
     (message "%d" days-after-weekend)
     (if (> days-after-weekend 0)
 	(message "Old Effort:%d (Days) remains unchanged" total-effort)
-       (progn (setq total-effort (- total-effort 2))
+      (progn (setq total-effort (- total-effort 2))
 	      (message "New Adjusted Effort:%d" total-effort)))
     total-effort
     )
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; Add planned dates w.r.t. Work
+;; Add planned dates w.r.t Work
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-add-planned-dates ()
@@ -715,20 +715,36 @@ Schedule Planning
     (dotimes (i 6) (org-cycle))
     ;; (schedule-delete-current-field-value-at-point)
     ;; (org-shifttab)
-    (message "Start date? ")
+    ;; (message "Start date? ")
     (org-time-stamp nil)
     (org-shifttab)
+    (search-forward-regexp "\\(<.*>\\)")
+    (setq cur-date (match-string 1))
+    (schedule-effort-adjust-add-planned-end-date)
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add & adjust planned dates w.r.t. Effort
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-effort-adjust-add-planned-end-date ()
+  "Add planned date in schedule table based on."
+  (let* (cur-task-name start end cur-block-name pos cur-effort cur-day cur-date)
+    (setq pos (point))
+    (org-beginning-of-line)
+    (dotimes (i 5) (org-cycle))
     (search-forward-regexp "\\([^ ]+\\)[\t ]+\\([^ ]+\\)[ \t]+[|][ \t]+[<]")
     (setq cur-block-name (match-string 1))
     (setq cur-task-name (match-string 2))
-    (message cur-task-name)
+    ;; (message cur-task-name)
     (search-backward "#+CAPTION: Effort Estimation Table")
     (setq start (point))
     (search-forward "#+CAPTION: Schedule Estimation Table")
     (setq end (point))
     (narrow-to-region start end)
     (beginning-of-buffer)
-    (message cur-block-name)
+    ;; (message cur-block-name)
     (search-forward cur-block-name)
     (right-char)
     (search-forward cur-task-name)
@@ -759,7 +775,8 @@ Schedule Planning
     (setq cur-date (match-string 1))
     (schedule-weekend-correction cur-date)
     (save-buffer)
-    ))
+    )
+  )
 
 (provide 'schedule-mode)
 ;;; schedule.el ends here
