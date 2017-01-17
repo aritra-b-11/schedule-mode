@@ -584,14 +584,17 @@ Schedule Planning
 ;; to delete it schedule-delete-current-field-value-at-point
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; Add mile stone date pair
+;; Check if point in schedule table or not
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-add-mile-stone-with-date ()
-  "Begin milestone date pair addition."
-  (interactive)
-  (message "Start Date? : ")
-  (org-time-stamp 16)
+(defun schedule-check-if-point-in-schedule-table (pos)
+  "Check if the POS/point is insde the schedule table or not."
+  (search-backward "#+CAPTION: Schedule Estimation Table")
+  (message "inside schedule table")
+  (goto-char pos)
+  (search-backward (concat " " schedule-table-actual-end))
+  (message "after the headers")
+  (goto-char pos)
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -703,23 +706,19 @@ Schedule Planning
 (defun schedule-add-planned-dates ()
   "Add planned Start & End Dates."
   (interactive)
-  (let* (pos cur-task-name cur-block-name cur-effort cur-date start end cur-day)
+  (let* (pos)
     (setq pos (point))
-    (search-backward "#+CAPTION: Schedule Estimation Table")
-    (message "inside schedule table")
-    (goto-char pos)
-    (search-backward (concat " " schedule-table-actual-end))
-    (message "after the headers")
-    (goto-char pos)
+    (schedule-check-if-point-in-schedule-table pos)
     (org-beginning-of-line)
     (dotimes (i 6) (org-cycle))
     ;; (schedule-delete-current-field-value-at-point)
     ;; (org-shifttab)
     ;; (message "Start date? ")
     (org-time-stamp nil)
-    (org-shifttab)
-    (search-forward-regexp "\\(<.*>\\)")
-    (setq cur-date (match-string 1))
+    (org-cycle)
+    ;; (org-shifttab)
+    ;; (search-forward-regexp "\\(<.*>\\)")
+    ;; (setq cur-date (match-string 1))
     (schedule-effort-adjust-add-planned-end-date)
     )
   )
@@ -729,7 +728,7 @@ Schedule Planning
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-effort-adjust-add-planned-end-date ()
-  "Add planned date in schedule table based on."
+  "Add planned date in schedule table."
   (let* (cur-task-name start end cur-block-name pos cur-effort cur-day cur-date)
     (setq pos (point))
     (org-beginning-of-line)
@@ -775,6 +774,22 @@ Schedule Planning
     (setq cur-date (match-string 1))
     (schedule-weekend-correction cur-date)
     (save-buffer)
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add mile stone date pair
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-mile-stone-with-date ()
+  "Begin milestone date pair addition."
+  (interactive)
+  (let* (pos mile-stone-date mile-stone-name)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (setq mile-stone-name (read-string "Mile Stone Name? "))
+    (org-time-stamp nil)
+    ;; (setq mile-stone-date)
     )
   )
 
