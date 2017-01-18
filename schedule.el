@@ -765,8 +765,7 @@ Schedule Planning
     (setq cur-day (substring (cadr (split-string cur-date)) 0 3))
     (setq cur-effort (schedule-add-days-in-effort-for-weeekend (string-to-number cur-effort) cur-day))
     ;; (message cur-effort)
-    (org-beginning-of-line)
-    (dotimes (i 7) (org-cycle))
+    (schedule-go-to-planning-end-colun)
     (schedule-add-end-date-adjusted cur-date (number-to-string cur-effort))
     (org-cycle)
     (org-shifttab)
@@ -778,18 +777,89 @@ Schedule Planning
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to planning end col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-planning-end-colun ()
+  "Go to planning end column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 7) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to milestone col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-milestone-colun ()
+  "Go to planning end column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 2) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to deadline col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-deadline-colun ()
+  "Go to planning end column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 3) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Add new table item
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-clear-org-table ()
+  "Enter a new ITEM in org table."
+  (org-shiftmetadown)
+  (org-ctrl-c-minus)
+  (org-metadown)
+  (org-cycle)
+  (org-shifttab)
+  (org-ctrl-c-minus)
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add mile stone date pair
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-add-mile-stone-with-date ()
   "Begin milestone date pair addition."
   (interactive)
-  (let* (pos mile-stone-date mile-stone-name)
+  (let* (pos mile-stone-date mile-stone-name cur-date)
     (setq pos (point))
     (schedule-check-if-point-in-schedule-table pos)
-    (setq mile-stone-name (read-string "Mile Stone Name? "))
-    (org-time-stamp nil)
-    ;; (setq mile-stone-date)
+    (while 1
+      (setq mile-stone-name (read-string "Mile Stone Name? [Press Ctrl-G when done]"))
+      (schedule-clear-org-table)
+      (schedule-go-to-milestone-colun)
+      (insert mile-stone-name)
+      (schedule-go-to-deadline-colun)
+      (org-time-stamp nil)
+      (org-shifttab)
+      (search-forward-regexp "\\(<.*>\\)")
+      (setq cur-date (match-string 1))
+      (schedule-weekend-correction cur-date)
+      (org-cycle)
+      (next-line)
+      ;; (setq mile-stone-date)
+      )
     )
   )
 
