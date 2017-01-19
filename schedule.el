@@ -706,21 +706,10 @@ Schedule Planning
 (defun schedule-add-planned-dates ()
   "Add planned Start & End Dates."
   (interactive)
-  (let* (pos)
-    (setq pos (point))
-    (schedule-check-if-point-in-schedule-table pos)
-    (org-beginning-of-line)
-    (dotimes (i 6) (org-cycle))
-    ;; (schedule-delete-current-field-value-at-point)
-    ;; (org-shifttab)
-    ;; (message "Start date? ")
-    (org-time-stamp nil)
-    (org-cycle)
-    ;; (org-shifttab)
-    ;; (search-forward-regexp "\\(<.*>\\)")
-    ;; (setq cur-date (match-string 1))
-    (schedule-effort-adjust-add-planned-end-date)
-    )
+  (schedule-go-to-planning-start-colun)
+  (org-time-stamp nil)
+  (org-cycle)
+  (schedule-effort-adjust-add-planned-end-date)
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -729,10 +718,9 @@ Schedule Planning
 
 (defun schedule-effort-adjust-add-planned-end-date ()
   "Add planned date in schedule table."
-  (let* (cur-task-name start end cur-block-name pos cur-effort cur-day cur-date)
+  (let* (cur-task-name pos start end cur-block-name cur-effort cur-day cur-date)
     (setq pos (point))
-    (org-beginning-of-line)
-    (dotimes (i 5) (org-cycle))
+    (schedule-go-to-work-column)
     (search-forward-regexp "\\([^ ]+\\)[\t ]+\\([^ ]+\\)[ \t]+[|][ \t]+[<]")
     (setq cur-block-name (match-string 1))
     (setq cur-task-name (match-string 2))
@@ -765,7 +753,7 @@ Schedule Planning
     (setq cur-day (substring (cadr (split-string cur-date)) 0 3))
     (setq cur-effort (schedule-add-days-in-effort-for-weeekend (string-to-number cur-effort) cur-day))
     ;; (message cur-effort)
-    (schedule-go-to-planning-end-colun)
+    (schedule-go-to-planning-end-column)
     (schedule-add-end-date-adjusted cur-date (number-to-string cur-effort))
     (org-cycle)
     (org-shifttab)
@@ -777,17 +765,17 @@ Schedule Planning
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; go to planning end col
+;; go to milestone col
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-go-to-planning-end-colun ()
+(defun schedule-go-to-sl-no-column ()
   "Go to planning end column."
   (let* (pos)
     (setq pos (point))
     (schedule-check-if-point-in-schedule-table pos)
     (goto-char pos)
     (org-beginning-of-line)
-    (dotimes (i 7) (org-cycle))
+    (dotimes (i 1) (org-cycle))
   )
 )
 
@@ -795,7 +783,7 @@ Schedule Planning
 ;; go to milestone col
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-go-to-milestone-colun ()
+(defun schedule-go-to-milestone-column ()
   "Go to planning end column."
   (let* (pos)
     (setq pos (point))
@@ -810,7 +798,7 @@ Schedule Planning
 ;; go to deadline col
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-go-to-deadline-colun ()
+(defun schedule-go-to-deadline-column ()
   "Go to planning end column."
   (let* (pos)
     (setq pos (point))
@@ -820,6 +808,67 @@ Schedule Planning
     (dotimes (i 3) (org-cycle))
   )
 )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to planning end col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-resource-column ()
+  "Go to Resource column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 4) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to planning end col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-work-column ()
+  "Go to Work column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 5) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to planning start col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-planning-start-column ()
+  "Go to planning start column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 6) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to planning start col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-planning-end-column ()
+  "Go to planning end column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 7) (org-cycle))
+  )
+)
+
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add new table item
@@ -848,16 +897,16 @@ Schedule Planning
     (while 1
       (setq mile-stone-name (read-string "Mile Stone Name? [Press Ctrl-G when done]"))
       (schedule-clear-org-table)
-      (schedule-go-to-milestone-colun)
+      (schedule-go-to-milestone-column)
       (insert mile-stone-name)
-      (schedule-go-to-deadline-colun)
+      (schedule-go-to-deadline-column)
       (org-time-stamp nil)
       (org-shifttab)
       (search-forward-regexp "\\(<.*>\\)")
       (setq cur-date (match-string 1))
       (schedule-weekend-correction cur-date)
       (org-cycle)
-      (next-line)
+      (next-line 2)
       ;; (setq mile-stone-date)
       )
     )
