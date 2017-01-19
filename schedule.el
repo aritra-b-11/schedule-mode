@@ -765,7 +765,7 @@ Schedule Planning
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; go to milestone col
+;; go to sl no col
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-go-to-sl-no-column ()
@@ -810,7 +810,7 @@ Schedule Planning
 )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; go to planning end col
+;; go to resource col
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-go-to-resource-column ()
@@ -825,7 +825,7 @@ Schedule Planning
 )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; go to planning end col
+;; go to work col
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-go-to-work-column ()
@@ -855,7 +855,7 @@ Schedule Planning
 )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; go to planning start col
+;; go to planning end col
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-go-to-planning-end-column ()
@@ -866,6 +866,36 @@ Schedule Planning
     (goto-char pos)
     (org-beginning-of-line)
     (dotimes (i 7) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to actual start col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-actual-start-column ()
+  "Go to planning start column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 8) (org-cycle))
+  )
+)
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; go to actual end col
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-actual-end-column ()
+  "Go to planning end column."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-schedule-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 9) (org-cycle))
   )
 )
 
@@ -906,7 +936,7 @@ Schedule Planning
       (setq cur-date (match-string 1))
       (schedule-weekend-correction cur-date)
       (org-cycle)
-      (next-line 2)
+      (next-line 3)
       ;; (setq mile-stone-date)
       )
     )
