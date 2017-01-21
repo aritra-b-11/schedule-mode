@@ -32,7 +32,7 @@
 ;; schedule-construct-assoc-list-from-effort-table ()
 ;; schedule-add-mile-stone-with-date ()
 ;; schedule-add-works-in-schedule-table ()
-;; schedule-add-mile-stones ()
+;; schedule-add-work-effort-to-schedule ()
 ;;; Code:
 (defun schedule-mode ()
   "Create schedule based on org mode.
@@ -626,7 +626,7 @@ Schedule Planning
 ;; Add mile stones
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-add-mile-stones ()
+(defun schedule-add-work-effort-to-schedule ()
   "Add mile stones based on effort table."
   (interactive)
   (setq block-work-assoc-list (schedule-construct-assoc-list-from-effort-table))
@@ -938,6 +938,70 @@ Schedule Planning
       (org-cycle)
       (next-line 3)
       ;; (setq mile-stone-date)
+      )
+    )
+  )
+
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Construct mile stone list
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+(defun schedule-construct-mile-stone-list ()
+  "Construct list of individual milestone."
+  (let* (start end each-milestone-name (milestone-list '()))
+    (search-backward "#+CAPTION: Effort Estimation Table")
+    (search-forward "#+CAPTION: Schedule Estimation Table")
+    (search-forward-regexp (concat "[ \t]+" schedule-table-sl "[ \t]+"))
+    (search-forward "+")
+    (search-forward-regexp "|[ ]+|")
+    (setq start (point))
+    (search-forward "#+END_TABLE")
+    (search-backward-regexp "|[ ]+")
+    (schedule-go-to-deadline-column)
+    (setq end (point))
+    (copy-rectangle-as-kill start end)
+    (end-of-buffer)
+    (setq start (point))
+    (yank-rectangle)
+    (goto-char start)
+    (replace-regexp "[-]+[+]-" "")
+    (goto-char start)
+    (replace-regexp "[ ]+[|] " "")
+    (setq end (point))
+    (goto-char start)
+    ;; (replace-regexp "" "")
+    ;; (narrow-to-region start end)
+    (while (search-forward-regexp "\\([a-zA-Z0-9.]\\)" nil t)
+      (setq each-milestone-name (match-string 1))
+      ;; (cons each-milestone-name milestone-list)
+      ;; (add-to-list milestone-list each-milestone-name)
+      (push each-milestone-name milestone-list)
+      (message "%s" each-milestone-name)
+      )
+    (setq milestone-list (reverse milestone-list))
+    (kill-region start end)
+    (message "mile stone list: %s" milestone-list)
+    (save-buffer)
+    milestone-list
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Allocate work with mile stone
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-allocate-work-with-mile-stone ()
+  "Allocate work with individual milestone."
+  (interactive)
+  (let* (mile-stone-list)
+    (setq mile-stone-list (schedule-construct-mile-stone-list))
+    (search-backward "#+CAPTION: Effort Estimation Table")
+    (search-forward "#+CAPTION: Schedule Estimation Table")
+    (search-forward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+"))
+    (dolist (each-mile-stone mile-stone-list)
+      (search-forward-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
       )
     )
   )
