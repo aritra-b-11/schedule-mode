@@ -512,7 +512,8 @@ Schedule Planning
 (defun schedule-construct-assoc-list-from-effort-table ()
   "Construct a Assoc list from the effort table."
   (interactive)
-  (setq block-work-assoc-list '())
+  (let* ((block-work-assoc-list '()) col-work col-block)
+  ;; (setq block-work-assoc-list '())
     ;; (defvar block-work-assoc-list '() "An association list for block and works")
     (message "starting to construct the assoc list from effort table")
     (search-backward-regexp (concat "^|[\t ]+" schedule-effort-table-cumulative "[\t ]+|"))
@@ -531,7 +532,7 @@ Schedule Planning
     (message "work col num:%s, block col num:%s" col-work col-block)
     (while (not (org-at-regexp-p (concat "|[\t ]+" schedule-effort-table-cumulative "[\t ]+|")))
       (message "in the loop")
-      (let* ((blockwise-work-list `()) key-block-name )
+      (let* ((blockwise-work-list `()) key-block-name pos dline-cur dline-end dline-start col-cur)
 	(message "in the let")
 	(search-backward "|-")
 	(org-cycle)
@@ -580,6 +581,7 @@ Schedule Planning
     (message "assoc list is:%s" block-work-assoc-list)
     block-work-assoc-list
     )
+  )
 ;; change it using schedule-calc-edit-formula
 ;; to delete it schedule-delete-current-field-value-at-point
 
@@ -601,26 +603,35 @@ Schedule Planning
 ;; Add Works from Effort
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(defun schedule-add-works-in-schedule-table ()
+(defun schedule-add-works-in-schedule-table (block-work-assoc-list)
   "Add all the works defined in arg:BLOCK-WORK-ASSOC-LIST, in the schedule table from the effort table."
-  (interactive)
   (let* (task-list)
-  (search-forward "#+CAPTION: Schedule Estimation Table")
-  (search-forward-regexp (concat "|[\t ]+" schedule-table-work "[\t ]+|"))
-  (dotimes (i 8) (org-cycle))
-  ;; Commentary:
-  ;; from here start putting all the work from effort table
-  (dolist (each-block (reverse block-work-assoc-list))
-    (message (caadr each-block))
-    (setq task-list (split-string (caadr each-block) "+"))
-    ;; (if (eq (length task-list) 1) then
-    ;;   (insert (concat (car each-block) " " (split-string (split-string each-task "(") ")")))
-    ;;   (dotimes (i 9) (org-cycle))
-    ;;   else
-    (dolist (each-task task-list)
-      ;; (setq each-task (split-string (split-string each-task "(") ")"))
-      (insert (concat (car each-block) " " each-task))
-      (dotimes (i 9) (org-cycle))))))
+    (search-forward "#+CAPTION: Schedule Estimation Table")
+    (search-forward-regexp (concat "|[\t ]+" schedule-table-work "[\t ]+|"))
+    (dotimes (i 8) (org-cycle))
+    ;; Commentary:
+    ;; from here start putting all the work from effort table
+    (dolist (each-block (reverse block-work-assoc-list))
+      (message (caadr each-block))
+      (setq task-list (split-string (caadr each-block) "+"))
+      ;; (setq task-list (split-string (split-string (split-string (caadr each-block) "+") ")") "("))
+      ;; (if (string-match "[+]" (caadr each-block))
+      ;; 	  (setq task-list (split-string (caadr each-block) "+"))
+      ;; 	(progn (string-match "(\\([^ ]+\\))" (caadr each-block))
+      ;; 	(setq task-list (match-string 1)))
+      ;; 	)
+      ;; (if (eq (length task-list) 1) then
+      ;;   (insert (concat (car each-block) " " (split-string (split-string each-task "(") ")")))
+      ;;   (dotimes (i 9) (org-cycle))
+      ;;   else
+      (dolist (each-task task-list)
+	;; (setq each-task (split-string (split-string each-task "(") ")"))
+	(insert (concat (car each-block) " " each-task))
+	(dotimes (i 9) (org-cycle))
+	)
+      )
+    )
+  )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Add mile stones
@@ -629,13 +640,15 @@ Schedule Planning
 (defun schedule-add-work-effort-to-schedule ()
   "Add mile stones based on effort table."
   (interactive)
-  (setq block-work-assoc-list (schedule-construct-assoc-list-from-effort-table))
-  (save-buffer)
-  ;; (set-mark-command)
-  (message "1st elem:%s, rest elems are:%s, length:%s" (car block-work-assoc-list) (cdr block-work-assoc-list) (length block-work-assoc-list))
-  (schedule-add-works-in-schedule-table)
-  ;; Still finding a way to create a new buffer
-  ;; (schedule-add-mile-stone-with-date)
+  (let* (block-work-assoc-list)
+    (setq block-work-assoc-list (schedule-construct-assoc-list-from-effort-table))
+    (save-buffer)
+    ;; (set-mark-command)
+    ;; (message "1st elem:%s, rest elems are:%s, length:%s" (car block-work-assoc-list) (cdr block-work-assoc-list) (length block-work-assoc-list))
+    (schedule-add-works-in-schedule-table block-work-assoc-list)
+    ;; Still finding a way to create a new buffer
+    ;; (schedule-add-mile-stone-with-date)
+    )
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -995,13 +1008,35 @@ Schedule Planning
 (defun schedule-allocate-work-with-mile-stone ()
   "Allocate work with individual milestone."
   (interactive)
-  (let* (mile-stone-list)
+  (let* (mile-stone-list block-work-assoc-list task-list choice)
     (setq mile-stone-list (schedule-construct-mile-stone-list))
     (search-backward "#+CAPTION: Effort Estimation Table")
     (search-forward "#+CAPTION: Schedule Estimation Table")
     (search-forward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+"))
+    (setq block-work-assoc-list (reverse (schedule-construct-assoc-list-from-effort-table)))
     (dolist (each-mile-stone mile-stone-list)
       (search-forward-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
+      (highlight-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
+      (dolist (each-block block-work-assoc-list)
+	(setq task-list (split-string (caadr each-block) "+"))
+	;; (if (string-match "[+]" (caadr each-block))
+	;;     (setq task-list (split-string (caadr each-block) "+"))
+	;;   (setq task-list (caadr each-block))
+	;;   )
+	(dolist (each-task task-list)
+	  (search-forward-regexp (concat (car each-block) " " each-task))
+	  (setq choice (read-string (concat "Add to the milestone " each-mile-stone " ? ['y' to Add; 'n' to Next; other to quit] ")))
+	  (if (choice=="y")
+	      (progn (message (concat "work " each-block " " each-task " will be added to " each-mile-stone)))
+	    )
+	  (if (choice=="n")
+	      (progn (message (concat "work " each-block " " each-task " will not be added to " each-mile-stone)))
+	    )
+					;add search backward each time mile stone loop exit
+					; the mile stone might be defined before the work
+					;fix error
+	  )
+	)
       )
     )
   )
