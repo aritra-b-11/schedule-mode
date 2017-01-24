@@ -1019,6 +1019,9 @@ Schedule Planning
     (search-forward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+"))
     (org-cycle)
     (dolist (each-mile-stone mile-stone-list)
+					;restructure loop
+					;in this way all works are prompted to enter multiple time
+					;mile stone should go inside task
       (search-backward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+|"))
       (search-forward-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
       (highlight-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
@@ -1038,13 +1041,16 @@ Schedule Planning
 	      (progn
 		(message (concat "work " (car each-block) " " each-task " will be added to " each-mile-stone))
 		(beginning-of-line)
-		(org-kill-line)
-		(org-kill-line)
+		(org-table-kill-row)
+		;; (org-kill-line)
+		;; (org-delete-backward-char 1)
 		(goto-char mile-stone-pos)
-		(org-end-of-line)
-		(org-return)
+		;; (org-end-of-line)
+		;; (insert "x")
+		;; (org-return)
+		(org-beginning-of-line)
 		(org-yank)
-		(org-kill-line)
+		;; (org-cycle)
 		(org-shifttab)
 		(setq mile-stone-pos (point))
 		     )
@@ -1054,9 +1060,6 @@ Schedule Planning
 		(message (concat "work " (car each-block) " " each-task " will not be added to " each-mile-stone))
 		     )
 	    )
-					;add search backward each time mile stone loop exit
-					; the mile stone might be defined before the work
-					;fix error
 	  )
 	)
       )
