@@ -1015,17 +1015,19 @@ Schedule Planning
     (search-forward "#+CAPTION: Schedule Estimation Table")
     (search-forward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+"))
     (org-cycle)
+    (recenter-top-bottom)
+    (recenter-top-bottom)
     (setq block-work-assoc-list (reverse (schedule-construct-assoc-list-from-effort-table)))
+					;make an alternet fun to construct this list
+					;excess effort might be added later
+					;this may include delay on each block
     (search-forward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+"))
     (org-cycle)
     (dolist (each-mile-stone mile-stone-list)
-					;restructure loop
-					;in this way all works are prompted to enter multiple time
-					;mile stone should go inside task
       (search-backward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+|"))
       (search-forward-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
       (highlight-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
-      (next-line)
+      (next-line 2)
       (setq mile-stone-pos (point))
       (dolist (each-block block-work-assoc-list)
 	(setq task-list (split-string (caadr each-block) "+"))
@@ -1036,7 +1038,8 @@ Schedule Planning
 	(dolist (each-task task-list)
 	  (search-backward-regexp (concat "|[ \t]+" schedule-table-deadline "[ \t]+|"))
 	  (search-forward-regexp (concat (car each-block) " " each-task))
-	  (setq choice (read-string (concat "Add to the milestone " each-mile-stone " ? ['y' to Add; 'n' to Next; other to quit] ")))
+	  (highlight-regexp (concat (car each-block) " " each-task) 'hi-pink)
+	  (setq choice (read-string (concat "Add to the milestone " each-mile-stone " ? ['y' to Add; 'n' to Next; Ctrl-g to quit] ")))
 	  (if (equal choice "y")
 	      (progn
 		(message (concat "work " (car each-block) " " each-task " will be added to " each-mile-stone))
@@ -1053,15 +1056,19 @@ Schedule Planning
 		;; (org-cycle)
 		(org-shifttab)
 		(setq mile-stone-pos (point))
-		     )
+		(unhighlight-regexp (concat (car each-block) " " each-task))
+		)
 	    )
 	  (if (equal choice "n")
 	      (progn
 		(message (concat "work " (car each-block) " " each-task " will not be added to " each-mile-stone))
-		     )
+		(unhighlight-regexp (concat (car each-block) " " each-task))
+		)
 	    )
+	  (unhighlight-regexp (concat (car each-block) " " each-task))
 	  )
 	)
+      (unhighlight-regexp (concat "|[ \t]+" each-mile-stone "[ \t]+|"))
       )
     )
   )
