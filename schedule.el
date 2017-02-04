@@ -116,6 +116,11 @@ Schedule Planning
 (defvar schedule-table-actual-end "Actual End" "Schedule Table Field Actual End.")
 (defvar schedule-table-start-mile-stone "Start of the project" "Schedule Table first Mile Stone.")
 (defvar schedule-table-end-mile-stone "End of the project" "Schedule Table last Mile Stone.")
+(defvar schedule-owner-effort-table-name "Owner" "Name ofthe owner.")
+(defvar schedule-owner-effort-total "Effort Total" "Total Effort of the owner.")
+(defvar schedule-owner-start-date "Start Date" "Start Date of the Owner.")
+(defvar schedule-owner-end-date "End Date" "End Date of the Owner.")
+
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; init template for effort estimation
@@ -1132,6 +1137,41 @@ Schedule Planning
       )
     )
   )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Write Owner Effort Table
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-write-owner-effort-table ()
+  "Create the effort for individual owners."
+  (interactive)
+  (end-of-buffer)
+  (insert "\n#+CAPTION: Owner Effort Table\n")
+  (insert "#+BEGIN_TABLE")
+  (org-return)
+  (insert "\n|-|-|-|-|\n")
+  (insert (concat "|" schedule-owner-effort-table-name "|" schedule-owner-effort-total "|" schedule-owner-start-date "|" schedule-owner-end-date "|"))
+  (org-cycle)
+  (org-ctrl-c-minus)
+  (org-metadown)
+  (org-ctrl-c-minus)
+  (org-shiftmetadown)
+  (org-metadown)
+  (end-of-buffer)
+  (org-return)
+  (insert "\n#+END_TABLE\n")
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Assign Owner with work
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-add-total-owners ()
+  "Assign owners."
+  (setq choice (read-string "Owner for this project? [(C-g to quit), Enter Names : ] "))
+  )
+
+
 
 (provide 'schedule-mode)
 ;;; schedule.el ends here
