@@ -1168,11 +1168,104 @@ Schedule Planning
 
 (defun schedule-add-total-owners ()
   "Assign owners."
-  (setq choice (read-string "Owner for this project? [(C-g to quit), Enter Names : ] "))
+  (interactive)
+  (let* (owner)
+    (search-backward "#+CAPTION: Effort Estimation Table")
+    (search-forward "#+CAPTION: Schedule Estimation Table")
+    (unless (search-forward "#+CAPTION: Owner Effort Table" nil t)
+      (schedule-write-owner-effort-table)
+      )
+    (end-of-buffer)
+    (search-backward "#+CAPTION: Owner Effort Table" nil t)
+    (search-forward-regexp (concat "|[ \t]+" schedule-owner-effort-table-name "[ \t]+|"))
+    (next-line 2)
+    (while 1
+      (org-shiftmetadown)
+      (org-metadown)
+      (schedule-go-to-owner-effort-table-name)
+      (setq owner (read-string "Owner for this project? ['Enter' one-by-one OR 'C-g' to quit], Enter Names : "))
+      (insert owner)
+      )
+    )
   )
 
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Check if Owner Table
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+(defun schedule-check-if-point-in-owner-table (pos)
+  "Check if point POS is in Owner Table."
+  (if (and (org-table-p) (search-backward "#+CAPTION: Owner Effort Table"))
+    (message "In Owner Table")
+    )
+  )
+
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Go to Owner Name field
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-owner-effort-table-name ()
+  "Go to Owner Name Field."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-owner-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 1) (org-cycle))
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Go to Owner Name field
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-owner-effort-table-effort ()
+  "Go to Owner effort Field."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-owner-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 2) (org-cycle))
+    )
+  )
+
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Go to Owner Name field
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-owner-effort-table-start-date ()
+  "Go to Owner start date Field."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-owner-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 3) (org-cycle))
+    )
+  )
+
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Go to Owner End date Field
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-owner-effort-table-end-date ()
+  "Go to Owner End date Field."
+  (let* (pos)
+    (setq pos (point))
+    (schedule-check-if-point-in-owner-table pos)
+    (goto-char pos)
+    (org-beginning-of-line)
+    (dotimes (i 4) (org-cycle))
+    )
+  )
 
 
 (provide 'schedule-mode)
 ;;; schedule.el ends here
+
 
