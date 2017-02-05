@@ -1169,7 +1169,7 @@ Schedule Planning
 (defun schedule-add-total-owners ()
   "Assign owners."
   (interactive)
-  (let* (owner)
+  (let* ((owner "owner"))
     (search-backward "#+CAPTION: Effort Estimation Table")
     (search-forward "#+CAPTION: Schedule Estimation Table")
     (unless (search-forward "#+CAPTION: Owner Effort Table" nil t)
@@ -1179,12 +1179,54 @@ Schedule Planning
     (search-backward "#+CAPTION: Owner Effort Table" nil t)
     (search-forward-regexp (concat "|[ \t]+" schedule-owner-effort-table-name "[ \t]+|"))
     (next-line 2)
-    (while 1
+    (while (not (equal owner " "))
       (org-shiftmetadown)
       (org-metadown)
       (schedule-go-to-owner-effort-table-name)
-      (setq owner (read-string "Owner for this project? ['Enter' one-by-one OR 'C-g' to quit], Enter Names : "))
+      (setq owner (read-string "Owner for this project? ['Enter' one-by-one OR Enter ' ' to quit], Enter Names : "))
       (insert owner)
+      )
+    (schedule-clear-table-row-if-field-is-empty 1)
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Go to Owner Name field
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-go-to-table-by-field-num (field)
+  "Go to table FIELD."
+    (unless (and (integerp field) (org-table-p)) (error "Not an int, pass the int field number!/Not in table, go to table!"))
+    (org-beginning-of-line)
+    (dotimes (i field) (org-cycle))
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Clear Table based on field value
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-clear-table-row-if-field-is-empty (field)
+  "Clear the table row if FIELD is empty.  Specify the field integer number in the FIELD."
+  (unless (and (integerp field) (org-table-p)) (error "Not an int, pass the int field number!/Not in table, go to table!"))
+  (let* (start end)
+    (search-backward "#+BEGIN_TABLE")
+    (search-forward "|-")
+    (while (org-table-p)
+      (let (del-row-flag)
+	(next-line)
+	(schedule-go-to-table-by-field-num field)
+	(search-backward "| ")
+	(right-char)
+	(setq start (point))
+	(search-forward " |")
+	(left-char)
+	(setq end (point))
+	(narrow-to-region start end)
+	(beginning-of-buffer)
+	(unless (search-forward-regexp "[^ ]" nil t) (setq del-row-flag t))
+	(widen)
+	(if del-row-flag (org-shiftmetaup))
+	)
       )
     )
   )
