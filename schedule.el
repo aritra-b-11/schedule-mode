@@ -1163,7 +1163,7 @@ Schedule Planning
   )
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; Assign Owner with work
+;; Assign Owner in woner table
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 (defun schedule-add-total-owners ()
@@ -1186,7 +1186,12 @@ Schedule Planning
       (setq owner (read-string "Owner for this project? ['Enter' one-by-one OR Enter ' ' to quit], Enter Names : "))
       (insert owner)
       )
-    (schedule-clear-table-row-if-field-is-empty 1)
+    (search-backward schedule-owner-end-date)
+    (next-line 2)
+    (while (org-table-p)
+      (schedule-clear-table-row-if-field-is-empty 1)
+      (next-line)
+      )
     )
   )
 
@@ -1306,6 +1311,63 @@ Schedule Planning
     )
   )
 
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Assign Owner with Work
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-assign-owner-with-work-in-schedule-table ()
+  "Assign Owner with work task pair."
+  (let* ((owner-list '()) pos)
+    (setq pos (point))
+    (setq owner-list (schedule-construct-owner-list))
+    (goto-char pos)
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Construct Owner list from the table
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-construct-owner-list ()
+  "Construct the owner list from the owner table."
+  (let* ((list-of-owners '()) start end each-owner)
+    (beginning-of-buffer)
+    (search-forward "#+CAPTION: Owner Effort Table")
+    (search-forward "|-")
+    (next-line 2)
+    (setq start (point))
+    (search-forward "#+END_TABLE")
+    (search-backward "-+-")
+    (schedule-go-to-owner-effort-table-effort)
+    (setq end (point))
+    (copy-rectangle-as-kill start end)
+    (end-of-buffer)
+    (setq start (point))
+    (yank-rectangle)
+    (goto-char start)
+    (replace-string "-" "")
+    (goto-char start)
+    (replace-string "+" "")
+    (goto-char start)
+    (replace-string "|" "")
+    (goto-char start)
+    (replace-regexp "[ ]+[|] " "")
+    (end-of-buffer)
+    (setq end (point))
+    (goto-char start)
+    (while (search-forward-regexp "\\([^ ]\\)" nil t)
+      (setq each-owner (match-string 1))
+      (push each-owner list-of-owners)
+      (message "%s" each-owner)
+      )
+    (setq list-of-owners (reverse list-of-owners))
+    (kill-region start end)
+    (message "Owner list: %s" list-of-owners)
+    (save-buffer)
+    list-of-owners
+    )
+  )
 
 (provide 'schedule-mode)
 ;;; schedule.el ends here
