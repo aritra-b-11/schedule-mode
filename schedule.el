@@ -1313,19 +1313,6 @@ Schedule Planning
 
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-;; Assign Owner with Work
-;; ++++++++++++++++++++++++++++++++++++++++++++++++++
-
-(defun schedule-assign-owner-with-work-in-schedule-table ()
-  "Assign Owner with work task pair."
-  (let* ((owner-list '()) pos)
-    (setq pos (point))
-    (setq owner-list (schedule-construct-owner-list))
-    (goto-char pos)
-    )
-  )
-
-;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Construct Owner list from the table
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1356,7 +1343,7 @@ Schedule Planning
     (end-of-buffer)
     (setq end (point))
     (goto-char start)
-    (while (search-forward-regexp "\\([^ ]\\)" nil t)
+    (while (search-forward-regexp "\\([a-zA-Z._]+\\)" nil t)
       (setq each-owner (match-string 1))
       (push each-owner list-of-owners)
       (message "%s" each-owner)
@@ -1366,6 +1353,47 @@ Schedule Planning
     (message "Owner list: %s" list-of-owners)
     (save-buffer)
     list-of-owners
+    )
+  )
+
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+;; Assign Owner with Work
+;; ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+(defun schedule-assign-owner-with-work-in-schedule-table ()
+  "Assign Owner with work task pair."
+  (interactive)
+  (let* ((owner-list '()) (work-task-list '()) pos (escape-work-list'()))
+    (setq pos (point))
+    (setq owner-list (schedule-construct-owner-list))
+    (goto-char pos)
+    (search-backward "#+CAPTION: Schedule Estimation Table" nil t)
+    (search-forward "#+CAPTION: Schedule Estimation Table" nil t)
+    (search-forward "#+BEGIN_TABLE" nil t)
+    (search-forward-regexp (concat "|[ ]+" schedule-table-sl "[ ]+|"))
+    (setq pos (point))
+    (setq work-task-list (schedule-construct-work-list-in-schedule-table))
+    (dolist (each-owner owner-list)
+      (dolist (each-work-task work-task-list)
+	(goto-char pos)
+	(if (member each-work-task escape-work-list)
+	    (message "%s is skipped from adding owner %s" each-work-task each-owner)
+	  (progn
+	    (search-forward each-work-task)
+	    (setq choice (read-string (concat "Add " each-owner " to " each-work-task  " ? ['y' to Add; 'n' to Next; Ctrl-g to quit] ")))
+	    (if (equal choice "y")
+		(progn
+		  (schedule-go-to-resource-column)
+		  (insert each-owner)
+		  (org-cycle)
+		  (push each-work-task escape-work-list)
+		  )
+	      (message "%s is skipped from assiging to %s" each-work-task each-owner)
+	      )
+	    )
+	  )
+	)
+      )
     )
   )
 
