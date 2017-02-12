@@ -5,15 +5,6 @@
 ;; --------------------
 ;; |   schedule mode  |
 ;; --------------------
-;; first checks
-;; if new file needs to be created,
-;; - yes asks where to create it
-;; - asks if initilize templates to be added
-;; -- yes adds the comment, effort templete, schedule template
-;; - changes the mode to shcedule mode
-;; else
-;; - make current buffer mode as schedule mode
-;; save buffer
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Functions :
 ;; schedule-mode ()
@@ -30,9 +21,40 @@
 ;; schedule-delete-current-table-formula ()
 ;; schedule-delete-current-field-value-at-point ()
 ;; schedule-construct-assoc-list-from-effort-table ()
-;; schedule-add-mile-stone-with-date ()
-;; schedule-add-works-in-schedule-table ()
+;; schedule-check-if-point-in-schedule-table (pos)
+;; schedule-add-works-in-schedule-table (block-work-assoc-list)
 ;; schedule-add-work-effort-to-schedule ()
+;; schedule-add-end-date-adjusted (cur-date cur-effort)
+;; schedule-weekend-correction (cur-date)
+;; schedule-add-days-in-effort-for-weeekend (cur-effort cur-day)
+;; schedule-add-planned-dates ()
+;; schedule-effort-adjust-add-planned-end-date ()
+;; schedule-go-to-sl-no-column ()
+;; schedule-go-to-milestone-column ()
+;; schedule-go-to-deadline-column ()
+;; schedule-go-to-resource-column ()
+;; schedule-go-to-work-column ()
+;; schedule-go-to-planning-start-column ()
+;; schedule-go-to-planning-end-column ()
+;; schedule-go-to-actual-start-column ()
+;; schedule-go-to-actual-end-column ()
+;; schedule-clear-org-table ()
+;; schedule-add-mile-stone-with-date ()
+;; schedule-construct-mile-stone-list ()
+;; schedule-construct-work-list-in-schedule-table ()
+;; schedule-allocate-work-with-mile-stone ()
+;; schedule-write-owner-effort-table ()
+;; schedule-add-total-owners ()
+;; schedule-go-to-table-by-field-num (field)
+;; schedule-clear-table-row-if-field-is-empty (field)
+;; schedule-check-if-point-in-owner-table (pos)
+;; schedule-go-to-owner-effort-table-name ()
+;; schedule-go-to-owner-effort-table-effort ()
+;; schedule-go-to-owner-effort-table-start-date ()
+;; schedule-go-to-owner-effort-table-end-date ()
+;; schedule-construct-owner-list ()
+;; schedule-assign-owner-with-work-in-schedule-table ()
+;; schedule-derive-planned-start-end-date-with-owner ()
 ;;; Code:
 (defun schedule-mode ()
   "Create schedule based on org mode.

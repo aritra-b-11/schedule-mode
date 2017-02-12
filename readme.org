@@ -1,34 +1,50 @@
-* features
+* Details of this mode
+
+Schedule mode is a derived mode of org. This is intended for haveing
+a table format for scheduling. This buffer will have folloing parts:
+1. *Comments* for usage help
+2. *effort table* for calculating total man days
+3. *schedule table* for checking milestone, resource, work, planned & actual dates
+4. *owner table* describing owners
 
 ** table for effort estimation
-headers:
-- C1:block name
-- C2:work
-- C3:effort
-- C4:total
+*headers:*
+- block name
+- work
+- effort
+- total
 
-first line:
-- C1:block name only
-- C2:reason
-- C4:total time
+*first line:*
+- block name only
+- reason
+- total time
 
-rest lines:
-- C2: detailed tasks
-- C3: detailed effort
+*rest lines:*
+- detailed tasks
+- detailed effort
 
 end with a vertical line
 
-automation scope:
-- calculate total effort from each effort rows
+** table for schedule table
+*headers:*
+- sl
+- mile stone
+- deadline
+- resource
+- work
+- planned start
+- planned end
+- actual start
+- actual end
 
-** check for resources
-** add time-line for estimated work
-** add dependency
-** new effort if added, subsequent date needs to be shifted accordingly
-** can check if effort table and schedule table are matched/balanced
-** can check free time for each resource
+each work is associated with an owner. each milestone is with a deadline.
 
-
+** table for owner
+*headers:*
+- owner
+- total effort
+- start date
+- end date
 
 * pending tasks
 ** generic
@@ -43,16 +59,16 @@ automation scope:
 *** DONE calculate total effort from individual block level efforts
 *** TODO plan for hierarchy system
 *** TODO link the work to schedule table work
-*** TODO add auto complete features to schedule work
+*** DONE add auto complete features to schedule work
 *** TODO plan for dependencies
 ** schedule related
 *** DONE make an associative array for block work list pair from effort table
-*** TODO initially: add all pending block works to the schedule table
+*** DONE initially: add all pending block works to the schedule table
 *** TODO mile stone to be inserted from a different buffer : mile-stone-buffer
 *** TODO mile stone buffer should have simple bind key like : arrow left, right, up, down to move
 *** TODO mile stone buffer should have simple bind key like : space to add and enter to finish
-*** TODO to check mile stone buffer should not allow any work to be before the defined block prev work
-*** TODO only start date needs to be added, others are ref it the effort
+*** DONE to check mile stone buffer should not allow any work to be before the defined block prev work
+*** DONE only start date needs to be added, others are ref it the effort
 *** TODO unbalanced work
 *** TODO free-time for resource
 
@@ -61,6 +77,6 @@ automation scope:
 ** schedule-add-works-in-schedule-table
 adding () in schedule table from single task work effort table
 ** schedule-calc-effort-table
-sometimes does not calculate cumulative efforts
+sometimes does not do calculate cumulative efforts
 
 
