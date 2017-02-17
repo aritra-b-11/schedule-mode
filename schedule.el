@@ -733,6 +733,7 @@ Schedule Planning
   (let* (weekends added-effort total-effort day-adjust days-after-weekend)
 					; mon=0, tue=1, wed=2, thu=3, fri=4
 					; eg: 12/5=2.4, 2*2=4, 12 + 4=16
+    (message "%s" cur-day)
     (if (equal cur-day "Mon") (setq day-adjust 0))
     (if (equal cur-day "Tue") (setq day-adjust 1))
     (if (equal cur-day "Wed") (setq day-adjust 2))
@@ -741,8 +742,9 @@ Schedule Planning
     (setq weekends (/ cur-effort 5))
     (setq added-effort (* weekends 2))
     (setq total-effort (+ cur-effort added-effort))
+    ;; (message "tot:%d adj:%d" total-effort day-adjust)
     (setq days-after-weekend (% (+ total-effort day-adjust) 7))
-    (message "%d" days-after-weekend)
+    ;; (message "%d" days-after-weekend)
     (if (> days-after-weekend 0)
 	(message "Old Effort:%d (Days) remains unchanged" total-effort)
       (progn (setq total-effort (- total-effort 2))
@@ -1511,10 +1513,94 @@ Schedule Planning
   )
 
 
+
+
+
+
+
+(defun schedule-get-effort-field-value ()
+  "Get the effort field value."
+  (let* (cur-block-name cur-task-name field init-pos)
+    (setq init-pos (point))
+    (schedule-go-to-work-column)
+    ;; (search-forward-regexp "\\([^ ]+\\)[\t ]+\\([^ ]+\\)[ \t]+[|][ \t]+[<]")
+    (search-forward-regexp "\\([a-zA-Z0-9._]+\\)[ ]+\\([a-zA-Z0-9._ ]+[a-zA-Z0-9._]+\\) ")
+    (setq cur-block-name (match-string 1))
+    (setq cur-task-name (match-string 2))
+    (search-backward (concat schedule-table-name-string schedule-effort-table-name))
+    (search-forward cur-block-name)
+    (search-forward cur-task-name)
+    (org-cycle)
+    ;; (search-forward-regexp "|[ ]+\\([0-9.]+\\)")
+    (setq field (nth-value 5 (split-string (org-table-field-info t))))
+    (goto-char init-pos)
+    field
+    )
+  )
+
+
+(defun schedule-get-effort-value ()
+  "Get the effort field value."
+  (let* (cur-block-name cur-task-name init-pos effort)
+    (setq init-pos (point))
+    (schedule-go-to-work-column)
+    ;; (search-forward-regexp "\\([^ ]+\\)[\t ]+\\([^ ]+\\)[ \t]+[|][ \t]+[<]")
+    (search-forward-regexp "\\([a-zA-Z0-9._]+\\)[ ]+\\([a-zA-Z0-9._ ]+[a-zA-Z0-9._]+\\) ")
+    (setq cur-block-name (match-string 1))
+    (setq cur-task-name (match-string 2))
+    (search-backward (concat schedule-table-name-string schedule-effort-table-name))
+    (search-forward cur-block-name)
+    (search-forward cur-task-name)
+    (search-forward-regexp "|[ ]+\\([0-9.]+\\)")
+    (setq effort (string-to-number (match-string 1)))
+    (message "%d is the effort" effort)
+    (goto-char init-pos)
+    effort
+    )
+  )
+
+(defun schedule-add-schedule-start-date-tblfm (name r-loc t-loc)
+  "Add schedule start date by NAME & R-LOC, T-LOC."
+  (org-table-edit-formulas)
+  (insert (concat t-loc " = remote(" name "," r-loc ")"))
+  (kill-visual-line)
+  (org-table-fedit-finish)
+  (org-ctrl-c-star)
+  )
+
+
+
+(defun schedule-add-days-in-effort-for-weeekend-return-only-added-effort (cur-effort cur-day)
+  "Add days in CUR-EFFORT effort for weekend, based on CUR-DAY."
+  (let* (weekends added-effort total-effort day-adjust days-after-weekend (excess-effort 0))
+					; mon=0, tue=1, wed=2, thu=3, fri=4
+					; eg: 12/5=2.4, 2*2=4, 12 + 4=16
+    (if (equal cur-day "Mon") (setq day-adjust 0))
+    (if (equal cur-day "Tue") (setq day-adjust 1))
+    (if (equal cur-day "Wed") (setq day-adjust 2))
+    (if (equal cur-day "Thu") (setq day-adjust 3))
+    (if (equal cur-day "Fri") (setq day-adjust 4))
+    (setq weekends (/ cur-effort 5))
+    (setq added-effort (* weekends 2))
+    (setq total-effort (+ cur-effort added-effort))
+    (setq days-after-weekend (% (+ total-effort day-adjust) 7))
+    (if (> days-after-weekend 0)
+	(message "Old Effort:%d (Days) remains unchanged" total-effort)
+      (progn
+	(setq total-effort (- total-effort 2))
+	(message "New Adjusted Effort:%d" total-effort)
+	(setq excess-effort (- total-effort cur-effort))
+	(message "added excess effort:%d" excess-effort)
+	)
+      )
+    excess-effort
+    )
+  )
+
 (defun schedule-derive-tblfm-planned-start-end-date-with-owner ()
   "Make the dates using the table formula."
   (interactive)
-  (let* (owner-list owner-table-pos cur-date schedule-table-pos start-date info tbl-name ref-field target-field total-work-for-owner effort-field cur-day total-effort effort)
+  (let* (owner-list owner-table-pos cur-date schedule-table-pos start-date info tbl-name ref-field target-field total-work-for-owner effort-field cur-day total-effort effort excess-effort)
     (setq owner-list (schedule-construct-owner-list))
     (search-backward schedule-owner-table-caption nil t)
     (search-forward schedule-owner-table-caption nil t)
@@ -1576,11 +1662,13 @@ Schedule Planning
 	  (setq effort (schedule-get-effort-value))
 	  (message "%d effort" effort)
 	  (schedule-go-to-planning-start-column)
-	  (search-forward-regexp "< \\([a-zA-Z]+\\)>)")
+	  (search-forward-regexp "<.+ \\([a-zA-Z]+\\)>")
 	  (setq cur-date (match-string 1))
 	  (message "%s date" cur-date)
-	  (setq total-effort (schedule-add-days-in-effort-for-weeekend effort cur-day))
-	  (schedule-add-schedule-end-date-tblfm ref-field target-field effort-field (- total-effort effort))
+	  (setq excess-effort (schedule-add-days-in-effort-for-weeekend-return-only-added-effort effort cur-date))
+	  (message "%s %s %s %d" ref-field target-field effort-field excess-effort)
+	  (schedule-go-to-planning-end-column)
+	  (schedule-add-schedule-end-date-tblfm ref-field target-field effort-field excess-effort)
 	  (schedule-go-to-planning-end-column)
 	  (search-forward-regexp "\\(<.*>\\)")
 	  (setq cur-date (match-string 1))
@@ -1594,59 +1682,8 @@ Schedule Planning
 (defun schedule-add-schedule-end-date-tblfm (r-loc t-loc e-loc i-effort)
   "Add schedule start date by R-LOC, T-LOC, E-LOC, DATE, I-EFFORT."
   (org-table-edit-formulas)
-  (insert (concat t-loc " = vsum(date(vsum(date(<" r-loc ">),remote(" schedule-effort-table-name "," e-loc ")))," i-effort ")"))
-  (kill-visual-line)
-  (org-table-fedit-finish)
-  (org-ctrl-c-star)
-  )
-
-
-
-(defun schedule-get-effort-field-value ()
-  "Get the effort field value."
-  (let* (cur-block-name cur-task-name field init-pos)
-    (setq init-pos (point))
-    (schedule-go-to-work-column)
-    ;; (search-forward-regexp "\\([^ ]+\\)[\t ]+\\([^ ]+\\)[ \t]+[|][ \t]+[<]")
-    (search-forward-regexp "\\([a-zA-Z0-9._]+\\)[ ]+\\([a-zA-Z0-9._ ]+[a-zA-Z0-9._]+\\) ")
-    (setq cur-block-name (match-string 1))
-    (setq cur-task-name (match-string 2))
-    (search-backward (concat schedule-table-name-string schedule-effort-table-name))
-    (search-forward cur-block-name)
-    (search-forward cur-task-name)
-    (org-cycle)
-    ;; (search-forward-regexp "|[ ]+\\([0-9.]+\\)")
-    (setq field (nth-value 5 (split-string (org-table-field-info t))))
-    (goto-char init-pos)
-    field
-    )
-  )
-
-
-(defun schedule-get-effort-value ()
-  "Get the effort field value."
-  (let* (cur-block-name cur-task-name init-pos effort)
-    (setq init-pos (point))
-    (schedule-go-to-work-column)
-    ;; (search-forward-regexp "\\([^ ]+\\)[\t ]+\\([^ ]+\\)[ \t]+[|][ \t]+[<]")
-    (search-forward-regexp "\\([a-zA-Z0-9._]+\\)[ ]+\\([a-zA-Z0-9._ ]+[a-zA-Z0-9._]+\\) ")
-    (setq cur-block-name (match-string 1))
-    (setq cur-task-name (match-string 2))
-    (search-backward (concat schedule-table-name-string schedule-effort-table-name))
-    (search-forward cur-block-name)
-    (search-forward cur-task-name)
-    (search-forward-regexp "|[ ]+\\([0-9.]+\\)")
-    (setq effort (string-to-number (match-string 1)))
-    (message "%d is the effort" effort)
-    (goto-char init-pos)
-    effort
-    )
-  )
-
-(defun schedule-add-schedule-start-date-tblfm (name r-loc t-loc)
-  "Add schedule start date by NAME & R-LOC, T-LOC."
-  (org-table-edit-formulas)
-  (insert (concat t-loc " = remote(" name "," r-loc ")"))
+  (insert (concat t-loc " = date(date(<" r-loc ">)+remote(" schedule-effort-table-name "," e-loc ")+" (number-to-string i-effort) ")"))
+;; vsum(date(vsum(date(<" r-loc ">),remote(" schedule-effort-table-name "," e-loc ")))," i-effort ")"))
   (kill-visual-line)
   (org-table-fedit-finish)
   (org-ctrl-c-star)
