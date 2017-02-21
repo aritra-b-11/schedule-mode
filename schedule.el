@@ -1562,6 +1562,7 @@ Schedule Planning
 (defun schedule-add-schedule-start-date-tblfm (name r-loc t-loc)
   "Add schedule start date by NAME & R-LOC, T-LOC."
   (org-table-edit-formulas)
+  (message "name:%s ref:%s loc:%s" name r-loc t-loc)
   (insert (concat t-loc " = remote(" name "," r-loc ")"))
   (kill-visual-line)
   (org-table-fedit-finish)
@@ -1600,13 +1601,17 @@ Schedule Planning
 (defun schedule-derive-tblfm-planned-start-end-date-with-owner ()
   "Make the dates using the table formula."
   (interactive)
-  (let* (owner-list owner-table-pos cur-date schedule-table-pos start-date info tbl-name ref-field target-field total-work-for-owner effort-field cur-day total-effort effort excess-effort)
+  (let* (owner-list owner-table-pos cur-date schedule-table-pos start-date info tbl-name ref-field target-field total-work-for-owner effort-field cur-day total-effort effort excess-effort owner-field)
     (setq owner-list (schedule-construct-owner-list))
     (search-backward schedule-owner-table-caption nil t)
     (search-forward schedule-owner-table-caption nil t)
     (search-forward schedule-begin-table nil t)
     (search-forward-regexp (concat "|[ ]+" schedule-owner-effort-table-name "[ ]+|"))
     (setq owner-table-pos (point))
+    ;; --------------------
+    ;; starting loop
+    ;; from this loop set the init date for each owner in the 'owner' table
+    ;; --------------------
     (dolist (each-owner owner-list)
       (goto-char owner-table-pos)
       (search-forward each-owner)
@@ -1617,46 +1622,58 @@ Schedule Planning
       (setq cur-date (match-string 1))
       (schedule-weekend-correction cur-date)
       )
+    ;; --------------------
+    ;; ending loop
+    ;; --------------------
     (search-backward schedule-table-caption nil t)
     (search-forward schedule-table-caption nil t)
     (search-forward schedule-begin-table nil t)
     (search-forward-regexp (concat "|[ ]+" schedule-table-sl "[ ]+|"))
     (setq schedule-table-pos (point))
+    ;; --------------------
+    ;; starting loop
+    ;; from this loop set the init date for each owner in the 'schedule' table
+    ;; --------------------
     (dolist (each-owner owner-list)
       (goto-char owner-table-pos)
       (search-forward each-owner)
       (schedule-go-to-owner-effort-table-start-date)
-      ;; (search-forward-regexp "\\([<].+[>]\\)[ ]+|")
-      ;; (setq start-date (match-string 1))
-      ;; (message "start date:%s" start-date)
       (setq ref-field (nth-value 5 (split-string (org-table-field-info t))))
-	    ;; line @3, col $3, ref @3$3 or C3
-      (message ref-field)
       (setq tbl-name schedule-owner-table-name)
-      (search-backward (concat schedule-table-name-string schedule-owner-table-name))
+      ;; --------------------
+      ;; ref field for at the owner table
+      ;; --------------------
+      ;; (message ref-field)
+      ;; (setq owner-field target-field);------------------>>> issue
+      ;; (search-backward (concat schedule-table-name-string schedule-owner-table-name))
+      ;; (goto-char schedule-table-pos)
+      ;; (dolist (each-owner owner-list)
+      ;; 	(goto-char schedule-table-pos)
       (goto-char schedule-table-pos)
-      ;; (setq cur-day (substring (cadr (split-string cur-date)) 0 3))
-      (dolist (each-owner owner-list)
-	;; (search-forward each-owner nil t)
-	;; (schedule-go-to-planning-start-column)
-	;; (schedule-delete-current-field-value-at-point)
-	;; (schedule-go-to-planning-start-column)
-	;; (setq target-field (nth-value 5 (split-string (org-table-field-info t))))
-	;; (schedule-add-schedule-start-date-tblfm tbl-name ref-field target-field)
 	(setq total-work-for-owner (count-matches each-owner schedule-table-pos owner-table-pos))
 	(dotimes (i total-work-for-owner)
 	  (message "Now setting #:%d work for the %s" i each-owner)
+	  ;; (goto-char schedule-table-pos)
 	  (search-forward each-owner owner-table-pos t)
 	  (schedule-go-to-planning-start-column)
 	  (schedule-delete-current-field-value-at-point)
 	  (schedule-go-to-planning-start-column)
 	  (setq target-field (nth-value 5 (split-string (org-table-field-info t))))
+	  ;; --------------------
+	  ;; enter table formula at this place
+	  ;; --------------------
+	  (message "passing %s" tbl-name)
 	  (schedule-add-schedule-start-date-tblfm tbl-name ref-field target-field)
 	  (setq tbl-name schedule-table-name)
 	  (schedule-go-to-planning-end-column)
 	  (schedule-delete-current-field-value-at-point)
 	  (schedule-go-to-planning-end-column)
-	  (setq ref-field target-field)
+	  ;; (setq ref-field target-field)
+	  ;; --------------------
+	  ;; --------------------
+	  ;; checked till this point
+	  ;; --------------------
+	  ;; --------------------
 	  (setq target-field (nth-value 5 (split-string (org-table-field-info t))))
 	  (setq effort-field (schedule-get-effort-field-value))
 	  (setq effort (schedule-get-effort-value))
@@ -1668,12 +1685,13 @@ Schedule Planning
 	  (setq excess-effort (schedule-add-days-in-effort-for-weeekend-return-only-added-effort effort cur-date))
 	  (message "%s %s %s %d" ref-field target-field effort-field excess-effort)
 	  (schedule-go-to-planning-end-column)
-	  (schedule-add-schedule-end-date-tblfm ref-field target-field effort-field excess-effort)
+	  ;; (schedule-add-schedule-end-date-tblfm owner-field target-field effort-field excess-effort)
 	  (schedule-go-to-planning-end-column)
+	  (setq owner-field (nth-value 5 (split-string (org-table-field-info t))))
 	  (search-forward-regexp "\\(<.*>\\)")
 	  (setq cur-date (match-string 1))
 	  (schedule-weekend-correction cur-date)
-	  )
+	  ;; )
 	)
       )
     )
@@ -1683,7 +1701,6 @@ Schedule Planning
   "Add schedule start date by R-LOC, T-LOC, E-LOC, DATE, I-EFFORT."
   (org-table-edit-formulas)
   (insert (concat t-loc " = date(date(<" r-loc ">)+remote(" schedule-effort-table-name "," e-loc ")+" (number-to-string i-effort) ")"))
-;; vsum(date(vsum(date(<" r-loc ">),remote(" schedule-effort-table-name "," e-loc ")))," i-effort ")"))
   (kill-visual-line)
   (org-table-fedit-finish)
   (org-ctrl-c-star)
