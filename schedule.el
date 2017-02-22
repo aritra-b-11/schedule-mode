@@ -1551,7 +1551,7 @@ Schedule Planning
     (search-backward (concat schedule-table-name-string schedule-effort-table-name))
     (search-forward cur-block-name)
     (search-forward cur-task-name)
-    (search-forward-regexp "|[ ]+\\([0-9.]+\\)")
+    (search-forward-regexp "|[ ]+\\([0-9.]+\\)[ ]+|")
     (setq effort (string-to-number (match-string 1)))
     (message "%d is the effort" effort)
     (goto-char init-pos)
@@ -1574,21 +1574,22 @@ Schedule Planning
 (defun schedule-add-days-in-effort-for-weeekend-return-only-added-effort (cur-effort cur-day)
   "Add days in CUR-EFFORT effort for weekend, based on CUR-DAY."
   (let* (weekends added-effort total-effort day-adjust days-after-weekend (excess-effort 0))
-					; mon=0, tue=1, wed=2, thu=3, fri=4
-					; eg: 12/5=2.4, 2*2=4, 12 + 4=16
-    (if (equal cur-day "Mon") (setq day-adjust 0))
-    (if (equal cur-day "Tue") (setq day-adjust 1))
-    (if (equal cur-day "Wed") (setq day-adjust 2))
-    (if (equal cur-day "Thu") (setq day-adjust 3))
-    (if (equal cur-day "Fri") (setq day-adjust 4))
+    ;; mon=0, tue=1, wed=2, thu=3, fri=4
+    ;; eg: 12/5=2.4, 2*2=4, 12 + 4=16
+    (if (equal cur-day "Mon") (setq day-adjust 1))
+    (if (equal cur-day "Tue") (setq day-adjust 2))
+    (if (equal cur-day "Wed") (setq day-adjust 3))
+    (if (equal cur-day "Thu") (setq day-adjust 4))
+    (if (equal cur-day "Fri") (setq day-adjust 5))
     (setq weekends (/ cur-effort 5))
     (setq added-effort (* weekends 2))
     (setq total-effort (+ cur-effort added-effort))
-    (setq days-after-weekend (% (+ total-effort day-adjust) 7))
-    (if (> days-after-weekend 0)
-	(message "Old Effort:%d (Days) remains unchanged" total-effort)
+    (message "values:%d %d %d" total-effort day-adjust (% (+ total-effort day-adjust) 6))
+    (setq days-after-weekend (% (+ total-effort day-adjust) 6))
+    (unless (eq days-after-weekend 0)
+      ;; (message "Old Effort:%d (Days) remains unchanged" total-effort)
       (progn
-	(setq total-effort (- total-effort 2))
+	;; (setq total-effort (- total-effort 2))
 	(message "New Adjusted Effort:%d" total-effort)
 	(setq excess-effort (- total-effort cur-effort))
 	(message "added excess effort:%d" excess-effort)
@@ -1597,6 +1598,11 @@ Schedule Planning
     excess-effort
     )
   )
+
+(defun schedule-hello-world ()
+  "Print."
+  (message "hello world")
+    )
 
 (defun schedule-derive-tblfm-planned-start-end-date-with-owner ()
   "Make the dates using the table formula."
@@ -1641,7 +1647,7 @@ Schedule Planning
       (setq ref-field (nth-value 5 (split-string (org-table-field-info t))))
       (setq tbl-name schedule-owner-table-name)
       ;; --------------------
-      ;; ref field for at the owner table
+      ;; ref field at the owner table for start date at schedule
       ;; --------------------
       ;; (message ref-field)
       ;; (setq owner-field target-field);------------------>>> issue
@@ -1650,39 +1656,40 @@ Schedule Planning
       ;; (dolist (each-owner owner-list)
       ;; 	(goto-char schedule-table-pos)
       (goto-char schedule-table-pos)
-	(setq total-work-for-owner (count-matches each-owner schedule-table-pos owner-table-pos))
-	(dotimes (i total-work-for-owner)
-	  (message "Now setting #:%d work for the %s" i each-owner)
-	  ;; (goto-char schedule-table-pos)
-	  (search-forward each-owner owner-table-pos t)
-	  (schedule-go-to-planning-start-column)
-	  (schedule-delete-current-field-value-at-point)
-	  (schedule-go-to-planning-start-column)
-	  (setq target-field (nth-value 5 (split-string (org-table-field-info t))))
-	  ;; --------------------
-	  ;; enter table formula at this place
-	  ;; --------------------
-	  (message "passing %s" tbl-name)
-	  (schedule-add-schedule-start-date-tblfm tbl-name ref-field target-field)
-	  (setq tbl-name schedule-table-name)
-	  (schedule-go-to-planning-end-column)
-	  (schedule-delete-current-field-value-at-point)
-	  (schedule-go-to-planning-end-column)
-	  ;; (setq ref-field target-field)
-	  ;; --------------------
-	  ;; --------------------
-	  ;; checked till this point
-	  ;; --------------------
-	  ;; --------------------
-	  (setq target-field (nth-value 5 (split-string (org-table-field-info t))))
-	  (setq effort-field (schedule-get-effort-field-value))
-	  (setq effort (schedule-get-effort-value))
-	  (message "%d effort" effort)
-	  (schedule-go-to-planning-start-column)
-	  (search-forward-regexp "<.+ \\([a-zA-Z]+\\)>")
-	  (setq cur-date (match-string 1))
-	  (message "%s date" cur-date)
-	  (setq excess-effort (schedule-add-days-in-effort-for-weeekend-return-only-added-effort effort cur-date))
+      (setq total-work-for-owner (count-matches each-owner schedule-table-pos owner-table-pos))
+      (dotimes (i total-work-for-owner)
+	(message "Now setting #:%d work for the %s" i each-owner)
+	;; (goto-char schedule-table-pos)
+	(search-forward each-owner owner-table-pos t)
+	(schedule-go-to-planning-start-column)
+	(schedule-delete-current-field-value-at-point)
+	(schedule-go-to-planning-start-column)
+	(setq target-field (nth-value 5 (split-string (org-table-field-info t))))
+	;; --------------------
+	;; enter table formula at this place
+	;; --------------------
+	(message "passing %s" tbl-name)
+	(schedule-add-schedule-start-date-tblfm tbl-name ref-field target-field)
+	(setq tbl-name schedule-table-name)
+	(schedule-go-to-planning-end-column)
+	(schedule-delete-current-field-value-at-point)
+	(schedule-go-to-planning-end-column)
+	;; (setq ref-field target-field)
+	(setq target-field (nth-value 5 (split-string (org-table-field-info t))))
+	(setq effort-field (schedule-get-effort-field-value))
+	(setq effort (schedule-get-effort-value))
+	(message "%d effort" effort)
+	(schedule-go-to-planning-start-column)
+	(search-forward-regexp "<.+ \\([a-zA-Z]+\\)>")
+	(setq cur-date (match-string 1))
+	(message "%s date" cur-date)
+	(setq excess-effort (schedule-add-days-in-effort-for-weeekend-return-only-added-effort effort cur-date))
+	;; --------------------
+	;; this function will not work as weekend adjustments will not happen otherwise for formula
+	;; --------------------
+	;; checked till this point
+	;; --------------------
+	;; --------------------
 	  (message "%s %s %s %d" ref-field target-field effort-field excess-effort)
 	  (schedule-go-to-planning-end-column)
 	  ;; (schedule-add-schedule-end-date-tblfm owner-field target-field effort-field excess-effort)
