@@ -46,6 +46,27 @@ each work is associated with an owner. each milestone is with a deadline.
 - start date
 - end date
 
+
+* Demo
+
+** initilize
+   [./gif/schedule-emacs-init.gif]
+** effort enter
+   [./gif/schedule-emacs-calc-effort.gif]
+** milestone
+   [./gif/schedule-emacs-sch-milestone-work.gif]
+** milestone date
+   [./gif/schedule-emacs-sch-milestone.gif]
+** work
+   [./gif/schedule-emacs-sch-owner-date.gif]
+** work resource
+   [./gif/schedule-emacs-sch-work-resource.gif]
+** resource date
+   [./gif/schedule-emacs-sch-work.gif]
+** work task
+   [./gif/schedule-emacs-work-task.gif]
+
+
 * pending tasks
 ** generic
 *** DONE create a mode for scheduling
