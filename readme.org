@@ -50,7 +50,7 @@ each work is associated with an owner. each milestone is with a deadline.
 * Demo
 
 ** initilize
-   [./gif/schedule-emacs-init.gif]
+   [[init][./gif/schedule-emacs-init.gif]]
 ** effort enter
    [./gif/schedule-emacs-calc-effort.gif]
 ** milestone
