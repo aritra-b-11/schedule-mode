@@ -1405,7 +1405,7 @@ Schedule Planning
 (defun schedule-assign-owner-with-work-in-schedule-table ()
   "Assign Owner with work task pair."
   (interactive)
-  (let* ((owner-list '()) (work-task-list '()) pos (escape-work-list'()))
+  (let* ((owner-list '()) (work-task-list '()) pos (escape-work-list'()) choice)
     (setq pos (point))
     (setq owner-list (schedule-construct-owner-list))
     (goto-char pos)
@@ -1569,40 +1569,10 @@ Schedule Planning
   (org-ctrl-c-star)
   )
 
-
-
-(defun schedule-add-days-in-effort-for-weeekend-return-only-added-effort (cur-effort cur-day)
-  "Add days in CUR-EFFORT effort for weekend, based on CUR-DAY."
-  (let* (weekends added-effort total-effort day-adjust days-after-weekend (excess-effort 0))
-    ;; mon=0, tue=1, wed=2, thu=3, fri=4
-    ;; eg: 12/5=2.4, 2*2=4, 12 + 4=16
-    (if (equal cur-day "Mon") (setq day-adjust 1))
-    (if (equal cur-day "Tue") (setq day-adjust 2))
-    (if (equal cur-day "Wed") (setq day-adjust 3))
-    (if (equal cur-day "Thu") (setq day-adjust 4))
-    (if (equal cur-day "Fri") (setq day-adjust 5))
-    (setq weekends (/ cur-effort 5))
-    (setq added-effort (* weekends 2))
-    (setq total-effort (+ cur-effort added-effort))
-    (message "values:%d %d %d" total-effort day-adjust (% (+ total-effort day-adjust) 6))
-    (setq days-after-weekend (% (+ total-effort day-adjust) 6))
-    (unless (eq days-after-weekend 0)
-      ;; (message "Old Effort:%d (Days) remains unchanged" total-effort)
-      (progn
-	;; (setq total-effort (- total-effort 2))
-	(message "New Adjusted Effort:%d" total-effort)
-	(setq excess-effort (- total-effort cur-effort))
-	(message "added excess effort:%d" excess-effort)
-	)
-      )
-    excess-effort
-    )
-  )
-
 (defun schedule-hello-world ()
   "Print."
   (message "hello world")
-    )
+  )
 
 (defun schedule-derive-tblfm-planned-start-end-date-with-owner ()
   "Make the dates using the table formula."
@@ -1711,6 +1681,35 @@ Schedule Planning
   (kill-visual-line)
   (org-table-fedit-finish)
   (org-ctrl-c-star)
+  )
+
+(defun schedule-add-days-in-effort-for-weeekend-return-only-added-effort (cur-effort cur-day)
+  "Add days in CUR-EFFORT effort for weekend, based on CUR-DAY."
+  (let* (weekends added-effort total-effort day-adjust days-after-weekend (excess-effort 0))
+    ;; mon=0, tue=1, wed=2, thu=3, fri=4
+    ;; eg: 12/5=2.4, 2*2=4, 12 + 4=16
+    (if (equal cur-day "Mon") (setq day-adjust 0))
+    (if (equal cur-day "Tue") (setq day-adjust 1))
+    (if (equal cur-day "Wed") (setq day-adjust 2))
+    (if (equal cur-day "Thu") (setq day-adjust 3))
+    (if (equal cur-day "Fri") (setq day-adjust 4))
+    (setq weekends (/ cur-effort 5))
+    (setq added-effort (* weekends 2))
+    (setq total-effort (+ cur-effort added-effort))
+    (message "values:%d %d %d" total-effort day-adjust (% (+ total-effort day-adjust) 7))
+    ;; will not work if the total days are less than 7
+    (setq days-after-weekend (% (+ total-effort day-adjust) 7))
+    (unless (eq days-after-weekend 0)
+      ;; (message "Old Effort:%d (Days) remains unchanged" total-effort)
+      (progn
+	;; (setq total-effort (- total-effort 2))
+	(message "New Adjusted Effort:%d" total-effort)
+	(setq excess-effort (- total-effort cur-effort))
+	(message "added excess effort:%d" excess-effort)
+	)
+      )
+    excess-effort
+    )
   )
 
 (provide 'schedule-mode)
