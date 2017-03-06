@@ -1577,7 +1577,7 @@ Schedule Planning
 (defun schedule-derive-tblfm-planned-start-end-date-with-owner ()
   "Make the dates using the table formula."
   (interactive)
-  (let* (owner-list owner-table-pos cur-date schedule-table-pos start-date info tbl-name ref-field target-field total-work-for-owner effort-field cur-day total-effort effort excess-effort owner-field)
+  (let* (owner-list owner-table-pos cur-date schedule-table-pos start-date info tbl-name ref-field target-field total-work-for-owner effort-field cur-day total-effort effort excess-effort owner-field (reset t))
     (setq owner-list (schedule-construct-owner-list))
     (search-backward schedule-owner-table-caption nil t)
     (search-forward schedule-owner-table-caption nil t)
@@ -1632,6 +1632,10 @@ Schedule Planning
 	;; (goto-char schedule-table-pos)
 	(search-forward each-owner owner-table-pos t)
 	(schedule-go-to-planning-start-column)
+	(if reset
+	    (setq owner-field (nth-value 5 (split-string (org-table-field-info t))))
+	  )
+	(setq reset nil)
 	(schedule-delete-current-field-value-at-point)
 	(schedule-go-to-planning-start-column)
 	(setq target-field (nth-value 5 (split-string (org-table-field-info t))))
@@ -1660,16 +1664,17 @@ Schedule Planning
 	;; checked till this point
 	;; --------------------
 	;; --------------------
-	  (message "%s %s %s %d" ref-field target-field effort-field excess-effort)
-	  (schedule-go-to-planning-end-column)
-	  ;; (schedule-add-schedule-end-date-tblfm owner-field target-field effort-field excess-effort)
-	  (schedule-go-to-planning-end-column)
-	  (setq owner-field (nth-value 5 (split-string (org-table-field-info t))))
-	  (search-forward-regexp "\\(<.*>\\)")
-	  (setq cur-date (match-string 1))
-	  (schedule-weekend-correction cur-date)
-	  ;; )
+	(message "%s %s %s %d" ref-field target-field effort-field excess-effort)
+	(schedule-go-to-planning-end-column)
+	(schedule-add-schedule-end-date-tblfm owner-field target-field effort-field excess-effort)
+	(schedule-go-to-planning-end-column)
+	(setq owner-field (nth-value 5 (split-string (org-table-field-info t))))
+	(search-forward-regexp "\\(<.*>\\)")
+	(setq cur-date (match-string 1))
+	(schedule-weekend-correction cur-date)
+	;; )
 	)
+      (setq reset t)
       )
     )
   )
@@ -1688,26 +1693,46 @@ Schedule Planning
   (let* (weekends added-effort total-effort day-adjust days-after-weekend (excess-effort 0))
     ;; mon=0, tue=1, wed=2, thu=3, fri=4
     ;; eg: 12/5=2.4, 2*2=4, 12 + 4=16
+    ;; if days > 2 & starts in friday it will go to monday
+    ;; so, weekend adition needs to happen that time
+    ;; 1:for effort 5, total efffort 5
+    ;; 2:for effort 6, total efffort 8
+    ;; 3:for effort 7, total efffort 9
+    ;; 4:for effort 8, total efffort 10
+    ;; 5:for effort 9, total efffort 11
+    ;; if it starts from monday, end date
+    ;; 1: friday 2: monday 3: tuesday 4: wednesday 5: thursday
+    ;; if it starts from tuesday, end date
+    ;; 1: monday 2: tuesday 3: wednesday 4: thursday 5:friday
+    ;; example:
+    ;; start date: march 10(friday), effort:7
+    ;; day-adj=4, 4+7=11, 11/5=2, 2*2=4, 7+4=11, 10+11=21, 21-1=20
+    ;; so need to do the days adjustment before the starting of the division
     (if (equal cur-day "Mon") (setq day-adjust 0))
     (if (equal cur-day "Tue") (setq day-adjust 1))
     (if (equal cur-day "Wed") (setq day-adjust 2))
     (if (equal cur-day "Thu") (setq day-adjust 3))
     (if (equal cur-day "Fri") (setq day-adjust 4))
-    (setq weekends (/ cur-effort 5))
-    (setq added-effort (* weekends 2))
-    (setq total-effort (+ cur-effort added-effort))
-    (message "values:%d %d %d" total-effort day-adjust (% (+ total-effort day-adjust) 7))
-    ;; will not work if the total days are less than 7
-    (setq days-after-weekend (% (+ total-effort day-adjust) 7))
-    (unless (eq days-after-weekend 0)
-      ;; (message "Old Effort:%d (Days) remains unchanged" total-effort)
-      (progn
-	;; (setq total-effort (- total-effort 2))
-	(message "New Adjusted Effort:%d" total-effort)
-	(setq excess-effort (- total-effort cur-effort))
-	(message "added excess effort:%d" excess-effort)
-	)
-      )
+    (setq added-effort (+ day-adjust cur-effort))
+    (setq weekends (/ added-effort 5))
+    (setq excess-effort (* weekends 2))
+    (message "weekend adjustment dates:%d" excess-effort)
+    ;; (message "Old Effort:%d, New effort:%d Extra effort:%d %d %d" cur-effort total-effort excess-effort added-effort weekends)
+    ;; (setq weekends (/ cur-effort 5))
+    ;; (setq added-effort (* weekends 2))
+    ;; (setq total-effort (+ cur-effort added-effort))
+    ;; (message "values:%d %d %d" total-effort day-adjust (% (+ total-effort day-adjust) 7))
+    ;; ;; will not work if the total days are less than 7
+    ;; (setq days-after-weekend (% (+ total-effort day-adjust) 7))
+    ;; (unless (eq days-after-weekend 0)
+    ;;   ;; (message "Old Effort:%d (Days) remains unchanged" total-effort)
+    ;;   (progn
+    ;; 	;; (setq total-effort (- total-effort 2))
+    ;; 	(message "New Adjusted Effort:%d" total-effort)
+    ;; 	(setq excess-effort (- total-effort cur-effort))
+    ;; 	(message "added excess effort:%d" excess-effort)
+    ;; 	)
+    ;;   )
     excess-effort
     )
   )
