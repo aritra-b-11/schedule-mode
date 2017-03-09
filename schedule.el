@@ -1,5 +1,5 @@
 ;;; schedule.el --- make scheduling in emacs org mode
-;; Copyright (C) Free Software Foundation, Inc.
+;; Copyright (C) Aritra Bhattacharjee.
 
 ;; Author: Aritra Bhattacharjee <aritrabhattacharjee12@gmail.com>
 ;; Keywords: org based schedule mode
