@@ -1592,6 +1592,14 @@ Schedule Planning
   (message "hello world")
   )
 
+(defun schedule-hello-world-tblfm ()
+  "Print."
+  (print "hello world")
+  )
+;; to use it in the formula:
+;; ::@8$8='(schedule-hello-world-tblfm)
+
+
 (defun schedule-add-days-in-effort-for-weeekend-return-only-added-effort (cur-effort cur-day)
   "Add days in CUR-EFFORT effort for weekend, based on CUR-DAY."
   (let* (weekends added-effort total-effort day-adjust days-after-weekend (excess-effort 0))
