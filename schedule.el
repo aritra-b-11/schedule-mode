@@ -1653,6 +1653,7 @@ Schedule Planning
   "Add schedule start date by R-LOC, T-LOC, E-LOC, DATE, I-EFFORT."
   (org-table-edit-formulas)
   (insert (concat t-loc " = date(date(<" r-loc ">)+remote(" schedule-effort-table-name "," e-loc ")+" (number-to-string i-effort) ")"))
+  (insert (concat t-loc " = '(schedule_calculate_end_date(" r-loc "," e-loc "))"))
   (kill-visual-line)
   (org-table-fedit-finish)
   (org-ctrl-c-star)
@@ -1758,7 +1759,18 @@ Schedule Planning
     )
   )
 
-
+(defun schedule_calculate_end_date (reference-date-field effort-number-field)
+  "Calculate the end date formula by REFERENCE-DATE-FIELD & EFFORT-NUMBER-FIELD."
+  (let* (pos field-value)
+    (setq pos (point))
+    (org-table-goto-field reference-date-field)
+    (setq field-value (org-table-get-field))
+    (message "at custom fun:%s" field-value)
+    (message reference-date-field)
+    (goto-char pos)
+    ;; (schedule-add-end-date-adjusted reference-date-field "2")
+    )
+  )
 
 (provide 'schedule-mode)
 ;;; schedule.el ends here
