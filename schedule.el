@@ -1652,7 +1652,7 @@ Schedule Planning
 (defun schedule-add-schedule-end-date-tblfm (r-loc t-loc e-loc i-effort)
   "Add schedule start date by R-LOC, T-LOC, E-LOC, DATE, I-EFFORT."
   (org-table-edit-formulas)
-  (insert (concat t-loc " = date(date(<" r-loc ">)+remote(" schedule-effort-table-name "," e-loc ")+" (number-to-string i-effort) ")"))
+  ;; (insert (concat t-loc " = date(date(<" r-loc ">)+remote(" schedule-effort-table-name "," e-loc ")+" (number-to-string i-effort) ")"))
   (insert (concat t-loc " = '(schedule_calculate_end_date(" r-loc "," e-loc "))"))
   (kill-visual-line)
   (org-table-fedit-finish)
@@ -1761,14 +1761,29 @@ Schedule Planning
 
 (defun schedule_calculate_end_date (reference-date-field effort-number-field)
   "Calculate the end date formula by REFERENCE-DATE-FIELD & EFFORT-NUMBER-FIELD."
-  (let* (pos field-value)
+  (let* (pos field-value cur-date excess-effort effort)
     (setq pos (point))
-    (org-table-goto-field reference-date-field)
-    (setq field-value (org-table-get-field))
+    ;; (org-table-goto-field reference-date-field)
+    (setq field-value (substring-no-properties (org-table-get-remote-range schedule-table-name reference-date-field)))
+    (setq effort (substring-no-properties (org-table-get-remote-range schedule-effort-table-name effort-number-field)))
+    ;; example of the Code:
+    ;; (substring-no-properties (org-table-get-remote-range "test" "@<$1"))
+    ;; (setq field-value (org-table-get-field))
     (message "at custom fun:%s" field-value)
-    (message reference-date-field)
-    (goto-char pos)
-    ;; (schedule-add-end-date-adjusted reference-date-field "2")
+    ;; (message reference-date-field)
+    ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% working
+    ;; (print field-value)
+    ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% working
+    ;; (goto-char pos)
+    ;; (schedule-add-end-date-adjusted field-value (number-to-string effort-number-field))
+    (string-match "<.+ \\([a-zA-Z]+\\)>" field-value)
+    (setq cur-date (match-string 1))
+    (message "%s date" cur-date)
+    (setq excess-effort (schedule-add-days-in-effort-for-weeekend-return-only-added-effort effort cur-date))
+    ;; need to convert the formula to elisp code for use
+    ;; then will take output to a variable
+    ;; then print it
+    ;; (insert (concat t-loc " = date(date(<" r-loc ">)+remote(" schedule-effort-table-name "," e-loc ")+" (number-to-string i-effort) ")"))
     )
   )
 
