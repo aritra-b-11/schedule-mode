@@ -1,0 +1,84 @@
+#+BEGIN_COMMENT
+---------------------------
+| Org Based Schedule Mode |
+---------------------------
+
+Usage: first fill the effort estimation table, then fill planning table
+
+	Effort Estimation table:
+		first line reserve for top block name
+		then from the next, fill individual task and effort
+		Finally calculate total effort of the block by pressing key
+
+	Schedule table:
+		Add milestone and important dates
+		Add asset and task
+		Set the date
+#+END_COMMENT
+
+
+
+#+CAPTION: Effort Estimation Table
+#+BEGIN_TABLE
+#+NAME: effort
+
+
+|------------+---------+--------+-------|
+| block name | work    | effort | total |
+|------------+---------+--------+-------|
+| Abc        |         |        |    11 |
+|            | ser2    |      4 |       |
+|            | sdde    |      5 |       |
+|            | sdsdssd |      2 |       |
+|------------+---------+--------+-------|
+| xyz        |         |        |     8 |
+|            | a       |      4 |       |
+|            | sdsdsd  |      5 |       |
+|------------+---------+--------+-------|
+| Cumulative |         |        |    19 |
+|------------+---------+--------+-------|
+#+TBLFM: @2$2=vsum(@3$2..@5$2)::@2$4=vsum(@2$3..@5$3)::@6$2=vsum(@7$2..@8$2)::@6$4=vsum(@6$3..@8$3)::@9$4=vsum(@2$3..@8$3)
+#+END_TABLE
+
+#+CAPTION: Schedule Estimation Table
+
+#+BEGIN_TABLE
+
+#+NAME: schedule
+
+|-----+------------+----------+----------+----------------------+------------------+------------------+--------------+------------|
+| Sl. | Mile Stone | Deadline | Resource | Work                 | Planned Start    | Planned End      | Actual Start | Actual End |
+|-----+------------+----------+----------+----------------------+------------------+------------------+--------------+------------|
+|-----+------------+----------+----------+----------------------+------------------+------------------+--------------+------------|
+|     | start      |          |          |                      |                  |                  |              |            |
+|-----+------------+----------+----------+----------------------+------------------+------------------+--------------+------------|
+|     |            |          | abcd     | Abc          ser2    | <2017-03-13 Mon> | <2017-03-17 Fri> |              |            |
+|     |            |          | xyz      | Abc          sdsdssd | <2017-03-13 Mon> | <2017-03-15 Wed> |              |            |
+|-----+------------+----------+----------+----------------------+------------------+------------------+--------------+------------|
+|     | end        |          |          |                      |                  |                  |              |            |
+|-----+------------+----------+----------+----------------------+------------------+------------------+--------------+------------|
+|     |            |          | abcd     | Abc          sdde    | <2017-03-17 Fri> | <2017-03-24 Fri> |              |            |
+|     |            |          | xyz      | xyz          a       | <2017-03-15 Wed> | <2017-03-21 Tue> |              |            |
+|     |            |          | abcd     | xyz          sdsdsd  | <2017-03-21 Tue> | <2017-03-28 Tue> | #ERROR       |            |
+|-----+------------+----------+----------+----------------------+------------------+------------------+--------------+------------|
+#+TBLFM: @3$6=remote(owner,@2$3)::@3$7=date(date(<@3$6>)+remote(effort,@3$3)+0)::@4$6=remote(owner,@3$3)::@4$7=date(date(<@4$6>)+remote(effort,@5$3)+0)::@6$6=remote(schedule,@3$7)::@6$7=date(date(<@3$7>)+remote(effort,@4$3)+2)::@7$6=remote(schedule,@4$7)::@7$7=date(date(<@4$7>)+remote(effort,@7$3)+2)::@8$6=remote(schedule,@7$7)::@8$7=date(date(<@8$6>)+remote(effort,@8$3)+2)::@8$8='(schedule_calculate_end_date "@8$7" "@8$7")
+
+#+END_TABLE
+
+#+CAPTION: Owner Effort Table
+
+#+BEGIN_TABLE
+
+#+NAME: owner
+
+|-------+--------------+------------------+----------|
+| Owner | Effort Total | Start Date       | End Date |
+|-------+--------------+------------------+----------|
+| abcd  |              | <2017-03-13 Mon> |          |
+| xyz   |              | <2017-03-13 Mon> |          |
+|-------+--------------+------------------+----------|
+
+#+END_TABLE
+
+
+
