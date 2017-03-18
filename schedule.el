@@ -1761,28 +1761,47 @@ Schedule Planning
 
 (defun schedule_calculate_end_date (reference-date-field effort-number-field)
   "Calculate the end date formula by REFERENCE-DATE-FIELD & EFFORT-NUMBER-FIELD."
-  (let* (pos field-value cur-date excess-effort effort)
+  (let* (pos date-field-value cur-date excess-effort effort end-date)
     (setq pos (point))
     ;; (org-table-goto-field reference-date-field)
-    (setq field-value (substring-no-properties (org-table-get-remote-range schedule-table-name reference-date-field)))
+
+    (setq date-field-value (substring-no-properties (org-table-get-remote-range schedule-table-name reference-date-field)))
+
+    ;; (message "val:%s %s" effort-number-field reference-date-field)
+    ;; (message "str:%s" (org-table-get-remote-range schedule-table-name effort-number-field))
+
     (setq effort (substring-no-properties (org-table-get-remote-range schedule-effort-table-name effort-number-field)))
+
     ;; example of the Code:
     ;; (substring-no-properties (org-table-get-remote-range "test" "@<$1"))
-    ;; (setq field-value (org-table-get-field))
-    (message "at custom fun:%s" field-value)
+    ;; (org-read-date nil t "<2015-11-06>" nil)
+    ;; end of example : http://emacs.stackexchange.com/questions/17906/convert-org-time-stamp
+    ;; http://sachachua.com/blog/2015/08/org-mode-date-arithmetic/
+    ;; https://github.com/dfeich/org-babel-examples
+    ;; (setq date-field-value (org-table-get-field))
+    ;; (setq date-field-value reference-date-field)
+    ;; (setq effort effort-number-field)
+    (message "at custom fun:%s %s" date-field-value effort)
     ;; (message reference-date-field)
     ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% working
-    ;; (print field-value)
+    ;; (print date-field-value)
     ;; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% working
     ;; (goto-char pos)
-    ;; (schedule-add-end-date-adjusted field-value (number-to-string effort-number-field))
-    (string-match "<.+ \\([a-zA-Z]+\\)>" field-value)
-    (setq cur-date (match-string 1))
+    ;; (schedule-add-end-date-adjusted date-field-value (number-to-string effort-number-field))
+    ;; (string-match "<.+ \\([a-zA-Z]+\\)>" date-field-value)
+    ;; (setq cur-date (match-string 1))
+    (setq cur-date (format-time-string "%a" (org-read-date nil t date-field-value nil)))
     (message "%s date" cur-date)
     (setq excess-effort (schedule-add-days-in-effort-for-weeekend-return-only-added-effort effort cur-date))
+    (message "effort:%d" excess-effort)
+    (setq end-date (org-read-date nil nil (concat "++" excess-effort) nil (org-time-string-to-time (org-read-date nil nil (concat "++" effort) nil (org-time-string-to-time "<2017-03-28 Tue>")))))
+    (message "date:%s" end-date)
+    ;; (setq end-date (org-read-date nil t (concat date-field-value "+" excess-effort "+" effort) nil))
+    (print end-date)
     ;; need to convert the formula to elisp code for use
     ;; then will take output to a variable
     ;; then print it
+    ;; date to num, then add efforts, then num to date
     ;; (insert (concat t-loc " = date(date(<" r-loc ">)+remote(" schedule-effort-table-name "," e-loc ")+" (number-to-string i-effort) ")"))
     )
   )
