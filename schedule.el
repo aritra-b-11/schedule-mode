@@ -18,11 +18,12 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
+;; Schedule Mode is a derived mode targeted for a scheduling system
+;; based on org-tables.
+
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Main function defination
-;; --------------------
-;; |   schedule mode  |
-;; --------------------
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++
 ;; Functions :
 ;; schedule-mode ()
@@ -73,7 +74,21 @@
 ;; schedule-construct-owner-list ()
 ;; schedule-assign-owner-with-work-in-schedule-table ()
 ;; schedule-derive-planned-start-end-date-with-owner ()
+;;
+;;; Dependency:
+;;
+;; Only Org Mode is needed.
+;;
+;;; Tested On:
+;; Emacs ... GNU Emacs 25.1.2 (i686-pc-linux-gnu, GTK+ Version 3.18.9) of 2016-09-24
+;; Org ... Org mode version 9.0.5 (9.0.5-elpa )
+;;
 ;;; Code:
+
+(eval-when-compile (require 'cl))
+(require 'org)
+(require 'org-table)
+
 (defun schedule-mode ()
   "Create schedule based on org mode.
 Current features include :
@@ -83,7 +98,6 @@ Schedule Planning
 2. Calculate the total effort formula from the effort template."
   (interactive)
   (let* (full-file-name file-name)
-    (require 'org)
     (if (y-or-n-p "Open or Create New file? ")
 	(progn
 	  (setq full-file-name (read-file-name "sOpen/Create file: "))
